@@ -1,28 +1,27 @@
-from flask import Blueprint, Flask, jsonify
-from openai import OpenAI
+from flask import Blueprint, Flask, jsonify, request, render_template
+from openai import OpenAI, ChatCompletion
 
 bp = Blueprint('main', __name__, url_prefix='/')
 
-llm = ChatOpenAI(model="gpt-3.5-turbo")
-llm.invoke("질문 여기에 넣기")
-
-
 # gpt api
-@bp.route('/')
+@bp.route('/ask', methods=['GET', 'POST']) 
 def get_response():
-    client = OpenAI(
-        api_key='sk-None-pD8etc7uK3XipaEg9w3qT3BlbkFJc5vO6cFltlMTN2xUgryQ'
-        )
+    if request.method == 'POST':  
+        user_question = request.form['question'] 
 
-# ChatGPT API 호출
-    completion = client.chat.completions.create(
-        model="gpt-3.5-turbo",
-        temperature=0.2,
-        messages=[
-            {"role": "system", "content": "당신은 폐기물 분리 AI챗봇입니다. '안녕하세요. 폐기물 분리 AI챗봇입니다. 무엇을 도와드릴까요?'로 시작해줘."},
-            {"role": "user", "content": "안녕하세요? 종이팩 분리수거 어떻게해?"},
-            {"role": "assistant", "content": """
-             종이팩은 내용물을 비우고 물로 한번 헹군 후 펼치거나 압착하여 봉투에 넣거나 한데 묶어서 버립니다.
+        client = OpenAI(
+            api_key='sk-None-pD8etc7uK3XipaEg9w3qT3BlbkFJc5vO6cFltlMTN2xUgryQ'
+            )
+
+        # ChatGPT API 호출
+        chat_completion = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            temperature=0.2,
+            messages=[
+                {"role": "system", "content": "당신은 폐기물 분리 AI챗봇입니다. '안녕하세요. 폐기물 분리 AI챗봇입니다. 무엇을 도와드릴까요?'로 시작해줘."},
+                {"role": "user", "content": user_question},
+                {"role": "assistant", "content": """
+                    종이팩은 내용물을 비우고 물로 한번 헹군 후 펼치거나 압착하여 봉투에 넣거나 한데 묶어서 버립니다.
              음료수병, 기타 병류는 병뚜껑을 제거한 후 내용물을 비우고 배출합니다. 병 안에 담배꽁초 등 이물질을 제거해야 합니다.
              철캔과 알루미늄캔은 내용물을 비우고 가능한 압착 합니다. 겉에 있는 플라스틱 뚜껑을 제거해야 합니다. 병 안에 담배꽁초 등 이물질을 제거해야 합니다.
              기타 캔류(부탄가스, 살충제 용기)는 굼어을 뚫어 내용물을 비운 후 배출합니다.
@@ -40,44 +39,30 @@ def get_response():
              농약용기는 내용물을 완전히 사용한 후 유리병, 플라스틱 용기별로 구분하여 뚜껑을 분리, 마대 등에 따로 넣어 배출합니다.
              농촌폐비닐은 하우스용 비닐과 멀칭용 비닐을 구분하여 흙과 자갈, 잡초를 털어낸 후 운반이 쉽도록 묶어서 마을공동집하장 또는 수거, 운반차량 진입이 가능한 일정 장소에 보관합니다.
              가정용 플라스틱류, 1회용 비닐봉투, 이불류, 신발, 가방류, 전선관, 파이프, 호스, 장판류, 카페트, 폐식용유는 각 구에서 정해진 요령대로 배출해야하니 구청 사이트에서 확인하시기 바랍니다.
-             """}
-            
-        ]
-    )
-# 질문과 답 반환
-    return completion.choices[0].message.content
+                 """}
+            ]
+        )
+        # 질문과 답 반환
+        response = chat_completion.choices[0].message.content
+        return jsonify({"response": response}) # JSON 으로 반환
+
+if __name__ == '__main__':
+    app.run()
 
 
-
-# 챗봇
-@bp.route('/chat', methods=["GET"])
-def chatbot():
-    # username 변수를 사용자의 URL에서 가져옴
-    return 'Use'
-  #  return {{ djwjej,}} 
 
 '''
-# 404 페이지
-@bp.route('/detail/<int:question_id>/')
-def detail(question_id): 
-    question = Question.query.get_or_404(question_id)   
-    return render_template('question/question_detail.html', question=question)
-
-
 # 회원가입
 @bp.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
 
-
 # 로그인
-
 
 
 # 로그아웃
 @bp.route('/logout')
 def logout():
-
 
 # ChatGPT API -- 폐기물 분리 봇
 @bp.route('/gpt')
@@ -85,7 +70,4 @@ def gptapi():
     # OpenAI 응답 가져옴
     response = get_response()
     return render_template('index.html', response=response)
-
 '''
-
-main_views = bp

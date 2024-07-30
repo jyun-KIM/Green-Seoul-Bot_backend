@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>OpenAI API TEST</title>
+    <style>
+    </style>
+</head>
+<body>
+    <h1>질문을 입력하세요.</h1>
+    <form action="/ask" method="post">
+        <textarea name="question" rows="4" cols="50"></textarea>
+        <br>
+        <input type="submit" value="Submit">
+    </form>
+    <h1>챗봇의 답변:</h1>
+    <div><p>{{ response }}</p>
+    </div>
+</body>
+</html>

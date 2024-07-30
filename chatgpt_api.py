@@ -3,7 +3,7 @@ from openai import OpenAI, ChatOpenAI
 
 from langchain_openai import ChatOpenAI
 
-os.environ['OPENAI_API_KEY'] = 'sk-None-pD8etc7uK3XipaEg9w3qT3BlbkFJc5vO6cFltlMTN2xUgryQ'
+os.environ['OPENAI_API_KEY'] = ''
 
 # model
 llm = ChatOpenAI(model="gpt-3.5-turbo")

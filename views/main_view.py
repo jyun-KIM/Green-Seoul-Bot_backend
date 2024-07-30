@@ -10,7 +10,7 @@ def get_response():
         user_question = request.form['question'] 
 
         client = OpenAI(
-            api_key='sk-None-pD8etc7uK3XipaEg9w3qT3BlbkFJc5vO6cFltlMTN2xUgryQ'
+            api_key=''
             )
 
         # ChatGPT API 호출

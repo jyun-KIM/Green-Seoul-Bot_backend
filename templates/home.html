@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="ko">
+<!DOCTYPE html>
+<html lang="ko">
 
 <head>
     <meta charset="UTF-8">
@@ -175,7 +176,8 @@
         .send-button:hover {
             background-color: #0056b3;
         }
-    </style></head>
+    </style>
+</head>
 
 <body>
     <div class="chat-container">
@@ -204,7 +206,7 @@
             <input type="text" id="userInput" placeholder="메시지 입력">
             <div class="attachment icon-attach">
                 <label for="fileUpload">@</label>
-                <input type="file" id="fileUpload" style="display: none;">
+                <input type="file" id="fileUpload" style="display: none;" onchange="showFileName()">
             </div>
             <button class="send-button" onclick="sendMessage()">Submit</button>
         </div>
@@ -217,28 +219,39 @@
             messageContainer.className = `message ${isUser ? 'user' : 'bot'}`;
             const messageBubble = document.createElement('div');
             messageBubble.className = `bubble ${isUser ? 'user' : 'bot'}`;
-            messageBubble.textContent = content;
+            messageBubble.innerHTML = content;
             messageContainer.appendChild(messageBubble);
             document.getElementById('chatMessages').appendChild(messageContainer);
             document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
+        }
+// 파일 업로드 기능
+        // Function to show the selected file name
+        function showFileName() {
+            const fileInput = document.getElementById('fileUpload');
+            if (fileInput.files.length > 0) {
+                const fileName = fileInput.files[0].name;
+                appendMessage(`Selected file: ${fileName}`, true);
+            }
         }
 
         // Function to send user input and file data
         function sendMessage() {
             const userInput = document.getElementById('userInput').value;
-            if (userInput.trim() === '') return;
-
-            appendMessage(userInput, true);
-            document.getElementById('userInput').value = '';
-
             const fileInput = document.getElementById('fileUpload');
             const file = fileInput.files.length > 0 ? fileInput.files[0] : null;
+
+            if (userInput.trim() === '' && !file) return;
+
+            if (userInput.trim() !== '') {
+                appendMessage(userInput, true);
+            }
 
             const formData = new FormData();
             formData.append('user_input', userInput);
             formData.append('payload', 'chat');
             if (file) {
                 formData.append('file', file);
+                appendMessage(`Uploading file: ${file.name}`, true);
             }
 
             fetch('http://localhost:5000/chatbot/', {
@@ -260,6 +273,7 @@
                     appendMessage('There was an error processing your request.', false);
                 });
 
+            document.getElementById('userInput').value = ''; // Clear user input
             fileInput.value = ''; // Clear file input
         }
 
@@ -296,6 +310,7 @@
             appendMessage("안녕하세요? (서비스 이름) 입니다.<br>재활용품과 관련하여 궁금한 것이 있으시다면 무엇이든지 물어보세요!<br>질문하고 싶은 내용을 직접 메시지를 입력하거나 이미지를 첨부해 주세요!", false);
             appendMessage("<button class='send-button' onclick='sendRequest(\"usage\")'>사용방법을 알려줘</button> <button class='send-button' onclick='sendRequest(\"policy\")'>재활용품 지원정책을 알고싶어</button> <button class='send-button' onclick='sendRequest(\"how_to_dispose\")'>이건 어떻게 버려?</button>", false);
         }
-    </script></body>
+    </script>
+</body>
 
 </html>

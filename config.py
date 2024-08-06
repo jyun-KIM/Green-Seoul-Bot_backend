@@ -1,4 +1,5 @@
 from flask import Flask, Blueprint, jsonify, request
+from flask_cors import CORS
 from flasgger import Swagger
 import os
 import pymysql
@@ -19,8 +20,15 @@ OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 def create_app():
     app = Flask(__name__) # Flask 애플리케이션을 생성
 
+    # CORS 설정 추가
+    CORS(app)
+
+    # Swagger 설정
+    swagger = Swagger(app)
+    configure_swagger(swagger)
+
+    # DB 연동
     try:
-        # DB 연동
         db = pymysql.connect(host='127.0.0.1', user='root', password='1234', db='akidb', charset='utf8')
         
         cursor = db.cursor()

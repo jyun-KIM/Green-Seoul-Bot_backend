@@ -86,6 +86,8 @@ class Chatbot(Resource):
 
         # 파일 업로드 처리 로직
         if file:
+            print("파일이 업로드되었습니다.")  # 이 문장이 출력되는지 확인
+
             filename = secure_filename(file.filename)  # 파일명을 안전하게 변환
             upload_dir = 'uploads' # 업로드 디렉토리 경로 설정
             os.makedirs(upload_dir, exist_ok=True)  # 업로드 디렉토리가 없으면 생성

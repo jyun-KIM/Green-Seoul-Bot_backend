@@ -1,0 +1,29 @@
+{
+    "districts": [
+        {"title": "강남구", "payload": "gangnam"},
+        {"title": "강동구", "payload": "gangdong"},
+        {"title": "강북구", "payload": "gangbuk"},
+        {"title": "강서구", "payload": "gangseo"},
+        {"title": "관악구", "payload": "gwanak"},
+        {"title": "광진구", "payload": "gwangjin"},
+        {"title": "구로구", "payload": "guro"},
+        {"title": "금천구", "payload": "geumcheon"},
+        {"title": "노원구", "payload": "nowon"},
+        {"title": "도봉구", "payload": "dobong"},
+        {"title": "동대문구", "payload": "dongdaemun"},
+        {"title": "동작구", "payload": "dongjak"},
+        {"title": "마포구", "payload": "mapo"},
+        {"title": "서대문구", "payload": "seodaemun"},
+        {"title": "서초구", "payload": "seocho"},
+        {"title": "성동구", "payload": "seongdong"},
+        {"title": "성북구", "payload": "seongbuk"},
+        {"title": "송파구", "payload": "songpa"},
+        {"title": "양천구", "payload": "yangcheon"},
+        {"title": "영등포구", "payload": "yeongdeungpo"},
+        {"title": "용산구", "payload": "yongsan"},
+        {"title": "은평구", "payload": "eunpyeong"},
+        {"title": "종로구", "payload": "jongno"},
+        {"title": "중구", "payload": "jung"},
+        {"title": "중랑구", "payload": "jungnang"}
+    ]
+}

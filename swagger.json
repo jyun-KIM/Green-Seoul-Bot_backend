@@ -1,0 +1,132 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "SeoulReChat API",
+    "description": "분리수거와 정책정보를 알려주는 AI챗봇 SeoulReChat API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5000"
+    }
+  ],
+  "paths": {
+    "/chatbot/": {
+      "post": {
+        "summary": "Chatbot endpoint for handling user input and payloads.",
+        "description": "Processes user input and payload to provide appropriate responses.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Chat"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Chat": {
+        "type": "object",
+        "properties": {
+          "user_input": {
+            "type": "string",
+            "description": "User input to the chatbot"
+          },
+          "payload": {
+            "type": "string",
+            "description": "Payload indicating the type of request",
+            "enum": [
+              "usage",
+              "policy",
+              "select_district",
+              "input_district",
+              "how_to_dispose",
+              "upload_photo",
+              "upload_another"
+            ]
+          },
+          "photo": {
+            "type": "string",
+            "description": "Photo URL for the item to dispose"
+          }
+        },
+        "required": ["payload"]
+      },
+      "ChatResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Response message from the chatbot"
+          },
+          "buttons": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "description": "Button title"
+                },
+                "payload": {
+                  "type": "string",
+                  "description": "Button payload"
+                },
+                "url": {
+                  "type": "string",
+                  "description": "Button URL (optional)"
+                }
+              },
+              "required": ["title"]
+            }
+          }
+        }
+      },
+      "DistrictForm": {
+        "type": "object",
+        "properties": {
+          "district_name": {
+            "type": "string",
+            "description": "Name of the district to retrieve information for",
+            "example": "강남구"
+          }
+        },
+        "required": ["district_name"]
+      },
+      "PhotoUploadForm": {
+        "type": "object",
+        "properties": {
+          "photo": {
+            "type": "string",
+            "description": "File path or URL for the uploaded photo",
+            "format": "binary"
+          }
+        },
+        "required": ["photo"]
+      }
+    }
+  }
+}

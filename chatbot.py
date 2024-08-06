@@ -148,13 +148,6 @@ class Chatbot(Resource):
                     ButtonDTO(title="다른 사진 업로드하기", payload="upload_another")
                 ]
             )
-        elif chat_request.payload == "upload_another":
-            response = ChatResponseDTO(
-                message="다른 사진을 업로드해주세요.",
-                buttons=[
-                    ButtonDTO(title="사진 첨부", payload="upload_photo")
-                ]
-            )
         else:
             # 기본 처리: OpenAI API를 통한 사용자 입력 처리
             chat_history = ''  # 실제 대화 기록을 여기에 대체

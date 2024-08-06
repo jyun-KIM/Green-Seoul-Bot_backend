@@ -1,5 +1,5 @@
 from flask import request, jsonify
-from flask_restx import Namespace, Resource
+from flask_restx import Namespace, Resource, fields
 import openai
 import json
 import os
@@ -13,8 +13,12 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 # 네임스페이스 정의
 chatbot_namespace = Namespace('chatbot', description='Chatbot operations')
 
-# 모델 정의
-chat_model = create_chat_model(chatbot_namespace)
+# 모델 정의 (Swagger에 나타낼 모델)
+chat_model = chatbot_namespace.model('ChatModel', {
+    'user_input': fields.String(required=True, description='User input text'),
+    'payload': fields.String(description='Payload data'),
+    'file': fields.String(description='Uploaded file path')
+})
 
 # 지역구 버튼 로드 함수
 def load_district_buttons():

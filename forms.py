@@ -2,6 +2,7 @@ from flask_wtf import FlaskForm # 폼 유효성 확인
 from wtforms import StringField, SelectField, FileField
 from wtforms.validators import DataRequired, Optional, URL, ValidationError
 
+
 class ChatForm(FlaskForm):
     user_input = StringField('User Input', validators=[Optional()])
     payload = SelectField(

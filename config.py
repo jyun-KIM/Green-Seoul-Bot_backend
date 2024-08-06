@@ -1,5 +1,6 @@
 from flask import Flask, Blueprint, jsonify, request
 from flasgger import Swagger
+import os
 import pymysql
 from flask_restx import Api, Resource, fields, Namespace # Api 구현을 위한 객체 import
 
@@ -10,6 +11,9 @@ swagger = Swagger(app)
 def configure_swagger(api):
     api.title = 'Chatbot API'
     api.version = '1.0'
+
+# gitignore 설정
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 
 # DB 설정
 def create_app():

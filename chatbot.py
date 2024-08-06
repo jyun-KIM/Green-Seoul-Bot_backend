@@ -1,5 +1,5 @@
-from flask import request, jsonify
-from flask_restx import Namespace, Resource, fields
+from flask import Flask, request, jsonify
+from flask_restx import Api, Namespace, Resource, fields
 import openai
 import json
 import os
@@ -7,11 +7,15 @@ from werkzeug.utils import secure_filename
 from models import create_chat_model
 from dto import ChatRequestDTO, ChatResponseDTO, ButtonDTO
 
+app = Flask(__name__)
+api = Api(app)
+
 # OpenAI API 키 설정
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 # 네임스페이스 정의
 chatbot_namespace = Namespace('chatbot', description='Chatbot operations')
+api.add_namespace(chatbot_namespace, path='/chatbot')
 
 # 모델 정의 (Swagger에 나타낼 모델)
 chat_model = chatbot_namespace.model('ChatModel', {
@@ -170,3 +174,4 @@ class Chatbot(Resource):
                 for button in response.buttons
             ]
         })
+    

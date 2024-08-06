@@ -21,7 +21,7 @@ api.add_namespace(chatbot_namespace, path='/chatbot')
 chat_model = chatbot_namespace.model('ChatModel', {
     'user_input': fields.String(required=True, description='User input text'),
     'payload': fields.String(description='Payload data'),
-    'file': fields.String(description='Uploaded file path')
+    'file': fields.Raw(description='Uploaded file path')
 })
 
 # 지역구 버튼 로드 함수
@@ -87,7 +87,7 @@ class Chatbot(Resource):
         # 파일 업로드 처리 로직
         if file:
             filename = secure_filename(file.filename)  # 파일명을 안전하게 변환
-            upload_dir = 'uploads'
+            upload_dir = 'uploads' # 업로드 디렉토리 경로 설정
             os.makedirs(upload_dir, exist_ok=True)  # 업로드 디렉토리가 없으면 생성
             file_path = os.path.join(upload_dir, filename)
             file.save(file_path)  # 파일을 지정된 경로에 저장

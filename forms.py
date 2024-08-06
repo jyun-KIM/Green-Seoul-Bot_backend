@@ -10,7 +10,6 @@ class ChatForm(FlaskForm):
             ("usage", "Usage"),
             ("policy", "Policy"),
             ("select_district", "Select District"),
-            ("input_district", "Input District"),
             ("how_to_dispose", "How to Dispose"),
             ("upload_photo", "Upload Photo"),
             ("upload_another", "Upload Another")

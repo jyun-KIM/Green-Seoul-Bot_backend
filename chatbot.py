@@ -39,21 +39,25 @@ district_websites = load_district_websites()  # 지역구 홈페이지 로드
 
 # OpenAI GPT-3.5 Turbo 응답 생성 함수
 def get_response(user_input, chat_history):
-    messages = [
-        {"role": "system", "content": f"Conversation history: {chat_history}"},
-        {"role": "user", "content": user_input}
-    ]
+    try:
+        messages = [
+            {"role": "system", "content": f"Conversation history: {chat_history}"},
+            {"role": "user", "content": user_input}
+        ]
     
-    # OpenAI API를 사용하여 GPT-3.5 Turbo 모델로부터 응답 생성
-    response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
-        temperature=0.2,
-        max_tokens=2000,
-        messages=messages
-    )
-    
-    chatgpt_output = response.choices[0].message['content']
-    return chatgpt_output
+        # OpenAI API를 사용하여 GPT-3.5 Turbo 모델로부터 응답 생성
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            temperature=0.2,
+            max_tokens=2000,
+            messages=messages
+        )
+        
+        chatgpt_output = response.choices[0].message['content']
+        return chatgpt_output
+    except Exception as e:
+        print(f"end=Error fetching response from OpenAI: {e}")
+        return "죄송합니다. 현재 서비스를 제공할 수 없습니다. 나중에 다시 시도해 주세요."
 
 # 엔드포인트: 채팅 처리
 @chatbot_namespace.route('/')

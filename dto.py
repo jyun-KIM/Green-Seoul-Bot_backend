@@ -1,22 +1,22 @@
-from dataclasses import dataclass
-from typing import List, Optional
+from dataclasses import dataclass, field
+from typing import Optional
 
-# 버튼 이름, 요청, url
+# 업로드 된 사진
 @dataclass
-class ButtonDTO:
-    title: str
-    payload: Optional[str] = None
-    url: Optional[str] = None
+class ImageUploadDTO:
+    image_file: bytes
 
-# 사용자 인풋, 요청
+# 정책 정보 - 00구
 @dataclass
-class ChatRequestDTO:
-    user_input: Optional[str] = None
-    payload: str
-    photo: Optional[str] = None
+class PolicyInfoDTO:
+    district_name: str
 
-# 챗봇 응답, 버튼 목록
+# 사용자 input
 @dataclass
-class ChatResponseDTO:
-    message: str
-    buttons: List[ButtonDTO]
+class UserInputDTO:
+    user_input: str
+
+# GPT API로부터의 응답
+@dataclass
+class GPTResponseDTO:
+    response_text: str

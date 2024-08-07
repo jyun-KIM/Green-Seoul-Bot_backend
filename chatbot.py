@@ -24,17 +24,6 @@ chat_model = chatbot_namespace.model('ChatModel', {
     'file': fields.Raw(description='Uploaded file path')
 })
 
-# 지역구 버튼 로드 함수
-def load_district_buttons():
-    with open('districts.json', 'r', encoding='utf-8') as file:
-        return json.load(file)["districts"]
-
-district_buttons = load_district_buttons()
-
-# 지역구 정보 로드 함수
-def load_districts():
-    with open('districts.json', 'r', encoding='utf-8') as file:
-        return json.load(file)
 
 # 지역구 홈페이지 URL 로드 함수
 def load_district_websites():
@@ -42,7 +31,7 @@ def load_district_websites():
         return json.load(file)
 
 # JSON 파일에서 데이터 로드
-districts = load_districts()  # 지역구 정보 로드
+districts = load_districts()  # 지역구 정보 로드 # 
 district_websites = load_district_websites()  # 지역구 홈페이지 로드
 
 # OpenAI GPT-3.5 Turbo 응답 생성 함수
@@ -84,7 +73,7 @@ class Chatbot(Resource):
             photo=None
         )
 
-        # 파일 업로드 처리 로직
+        # 파일 업로드 처리 로직 (안됨!)
         if file:
             print("파일이 업로드되었습니다.")  # 이 문장이 출력되는지 확인
 

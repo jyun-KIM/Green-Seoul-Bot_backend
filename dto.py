@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List, Optional, Union
+from typing import List, Optional
 
 # 버튼 이름, 요청, url
 @dataclass

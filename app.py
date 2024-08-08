@@ -1,12 +1,10 @@
-from flask import Flask, render_template
+from flask import Flask
 from config import create_app
+from chatbot import Chatbot
 
 app, api = create_app()
 
-# html로 기능 테스트
-@app.route('/')
-def home():
-    return render_template('home.html')
+api.add_namespace(Chatbot,'/chatbot')
 
 
 if __name__ == '__main__':

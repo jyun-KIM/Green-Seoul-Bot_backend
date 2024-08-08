@@ -15,8 +15,3 @@ class PolicyInfoDTO:
 @dataclass
 class UserInputDTO:
     user_input: str
-
-# GPT API로부터의 응답
-@dataclass
-class GPTResponseDTO:
-    response_text: str

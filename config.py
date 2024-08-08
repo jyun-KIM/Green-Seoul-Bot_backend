@@ -13,7 +13,7 @@ def configure_swagger(api):
     api.title = 'Chatbot API'
     api.version = '1.0'
 
-# gitignore 설정
+# OpenAI API 키 설정
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 
 # DB 설정

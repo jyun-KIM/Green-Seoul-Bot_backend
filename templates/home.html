@@ -1,316 +1,109 @@
 <!DOCTYPE html>
 <html lang="ko">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SeoulReChat test</title>
+    <title>SeoulReChat Test Interface</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #333;
+            background-color: #f4f4f9;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             height: 100vh;
             margin: 0;
-            color: #fff;
         }
-
         .chat-container {
-            background-color: #1a1a1a;
+            background-color: #fff;
             padding: 20px;
-            border-radius: 10px;
+            border-radius: 5px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             max-width: 400px;
             width: 100%;
-            display: flex;
-            flex-direction: column;
-            height: 80vh;
-            overflow: hidden;
-            position: relative;
         }
-
-        .chat-header {
-            font-size: 18px;
-            font-weight: bold;
-            color: #fff;
-            text-align: center;
+        .chat-container h1 {
+            font-size: 24px;
             margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
         }
-
-        .refresh-button {
-            position: absolute;
-            left: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 18px;
-            color: #fff;
-        }
-
-        .refresh-button:hover {
-            color: #ccc;
-        }
-
-        .chat-messages {
-            flex-grow: 1;
-            overflow-y: auto;
+        .chat-container input[type="text"], .chat-container input[type="file"] {
+            width: calc(100% - 22px);
             padding: 10px;
-            border-radius: 5px;
-            background-color: #262626;
             margin-bottom: 10px;
-            border: 1px solid #444;
-        }
-
-        .message {
-            margin: 10px 0;
-            display: flex;
-            align-items: flex-start;
-        }
-
-        .message.user {
-            justify-content: flex-end;
-        }
-
-        .bubble {
-            padding: 10px 15px;
-            border-radius: 15px;
-            max-width: 70%;
-            word-wrap: break-word;
-            position: relative;
-            color: #fff;
-        }
-
-        .bubble.user {
-            background-color: #007bff;
-            color: #fff;
-        }
-
-        .bubble.bot {
-            background-color: #444;
-            color: #fff;
-        }
-
-        .input-container {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .input-container input[type="text"] {
-            flex-grow: 1;
-            padding: 10px;
-            border-radius: 5px;
-            border: 1px solid #555;
+            border-radius: 4px;
+            border: 1px solid #ccc;
             box-sizing: border-box;
-            background-color: #262626;
-            color: #fff;
         }
-
-        .input-container input[type="text"]::placeholder {
-            color: #aaa;
-        }
-
-        .input-container button {
-            padding: 10px;
-            border: none;
-            border-radius: 5px;
-            background-color: #007bff;
-            color: #fff;
-            cursor: pointer;
-            font-size: 16px;
-        }
-
-        .input-container button:hover {
-            background-color: #0056b3;
-        }
-
-        .attachment {
-            border: 1px solid #555;
-            border-radius: 5px;
-            padding: 10px;
-            cursor: pointer;
-            background-color: #444;
-        }
-
-        .attachment:hover {
-            background-color: #555;
-        }
-
-        .attachment label {
-            cursor: pointer;
-            display: block;
+        .chat-container button {
             width: 100%;
-            text-align: center;
-            font-weight: bold;
-            color: #fff;
-        }
-
-        .icon-refresh:before {
-            content: "\21bb";
-        }
-
-        .icon-attach:before {
-            content: "@";
-            font-weight: bold;
-        }
-
-        .send-button {
-            padding: 10px 20px;
+            padding: 10px;
+            margin-bottom: 5px;
             border: none;
-            border-radius: 5px;
+            border-radius: 4px;
             background-color: #007bff;
             color: #fff;
             cursor: pointer;
             font-size: 16px;
         }
-
-        .send-button:hover {
+        .chat-container button:hover {
             background-color: #0056b3;
+        }
+        .response {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        .response p {
+            margin: 0 0 10px;
+            padding: 0;
+        }
+        .response a {
+            text-decoration: none;
+            color: #007bff;
+            display: block;
+            margin-top: 5px;
         }
     </style>
 </head>
-
 <body>
     <div class="chat-container">
-        <div class="chat-header">
-            <button class="refresh-button icon-refresh" onclick="refreshChat()"></button>
-            AI 챗봇 서비스
-        </div>
-        <div class="chat-messages" id="chatMessages">
-            <!-- Initial Bot Message -->
-            <div class="message bot">
-                <div class="bubble bot">
-                    안녕하세요? 서울리챗 입니다.<br>
-                    재활용품과 관련하여 궁금한 것이 있으시다면 무엇이든지 물어보세요!<br>
-                    <br>질문하고 싶은 내용을 직접 메시지를 입력하거나 이미지를 첨부해 주세요!
-                </div>
-            </div>
-            <div class="message bot">
-                <div class="bubble bot">
-                    <button class="send-button" onclick="sendRequest('usage')">사용방법을 알려줘</button>
-                    <button class="send-button" onclick="sendRequest('policy')">재활용품 지원정책을 알고싶어</button>
-                    <button class="send-button" onclick="sendRequest('how_to_dispose')">이건 어떻게 버려?</button>
-                </div>
-            </div>
-        </div>
-        <div class="input-container">
-            <input type="text" id="userInput" placeholder="메시지 입력">
-            <div class="attachment icon-attach">
-                <label for="fileUpload">@</label>
-                <input type="file" id="fileUpload" style="display: none;" onchange="showFileName()">
-            </div>
-            <button class="send-button" onclick="sendMessage()">Submit</button>
+        <h1>SeoulReChat Interface</h1>
+        <input type="text" id="userInput" placeholder="Enter your question...">
+        <input type="file" id="fileUpload">
+        <button onclick="sendRequest('upload-photo')">Upload Photo</button>
+        <button onclick="sendRequest('policy')">Get Policy Info</button>
+        <button onclick="sendRequest('chat')">Send Message</button>
+        <div class="response" id="responseContainer">
+            <!-- Response will be displayed here -->
         </div>
     </div>
-
     <script>
-        // Function to append messages to the chat
-        function appendMessage(content, isUser) {
-            const messageContainer = document.createElement('div');
-            messageContainer.className = `message ${isUser ? 'user' : 'bot'}`;
-            const messageBubble = document.createElement('div');
-            messageBubble.className = `bubble ${isUser ? 'user' : 'bot'}`;
-            messageBubble.innerHTML = content;
-            messageContainer.appendChild(messageBubble);
-            document.getElementById('chatMessages').appendChild(messageContainer);
-            document.getElementById('chatMessages').scrollTop = document.getElementById('chatMessages').scrollHeight;
-        }
-// 파일 업로드 기능
-        // Function to show the selected file name
-        function showFileName() {
-            const fileInput = document.getElementById('fileUpload');
-            if (fileInput.files.length > 0) {
-                const fileName = fileInput.files[0].name;
-                appendMessage(`Selected file: ${fileName}`, true);
-            }
-        }
-
-        // Function to send user input and file data
-        function sendMessage() {
+        function sendRequest(api) {
             const userInput = document.getElementById('userInput').value;
-            const fileInput = document.getElementById('fileUpload');
-            const file = fileInput.files.length > 0 ? fileInput.files[0] : null;
-
-            if (userInput.trim() === '' && !file) return;
-
-            if (userInput.trim() !== '') {
-                appendMessage(userInput, true);
-            }
+            const fileUpload = document.getElementById('fileUpload').files[0];
+            const apiUrl = `http://localhost:5000/chatbot/${api}`;
 
             const formData = new FormData();
-            formData.append('user_input', userInput);
-            formData.append('payload', 'chat');
-            if (file) {
-                formData.append('file', file);
-                appendMessage(`Uploading file: ${file.name}`, true);
-            }
+            if (userInput) formData.append('user_input', userInput);
+            if (fileUpload) formData.append('file', fileUpload);
 
-            fetch('http://localhost:5000/chatbot/', {
+            fetch(apiUrl, {
                 method: 'POST',
                 body: formData
             })
-                .then(response => response.json())
-                .then(data => {
-                    appendMessage(data.message, false);
-                    if (data.buttons) {
-                        data.buttons.forEach(button => {
-                            const buttonMessage = `${button.title}${button.url ? `: ${button.url}` : ''}`;
-                            appendMessage(buttonMessage, false);
-                        });
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    appendMessage('There was an error processing your request.', false);
-                });
-
-            document.getElementById('userInput').value = ''; // Clear user input
-            fileInput.value = ''; // Clear file input
-        }
-
-        // Function to handle payload-specific requests
-        function sendRequest(payload) {
-            const formData = new FormData();
-            formData.append('user_input', '');
-            formData.append('payload', payload);
-
-            fetch('http://localhost:5000/chatbot/', {
-                method: 'POST',
-                body: formData
+            .then(response => response.json())
+            .then(data => {
+                const responseContainer = document.getElementById('responseContainer');
+                responseContainer.innerHTML = '';
+                const message = document.createElement('p');
+                message.textContent = data.message;
+                responseContainer.appendChild(message);
             })
-                .then(response => response.json())
-                .then(data => {
-                    appendMessage(data.message, false);
-                    if (data.buttons) {
-                        data.buttons.forEach(button => {
-                            const buttonMessage = `${button.title}${button.url ? `: ${button.url}` : ''}`;
-                            appendMessage(buttonMessage, false);
-                        });
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    appendMessage('There was an error processing your request.', false);
-                });
-        }
-
-        // Function to refresh the chat
-        function refreshChat() {
-            const chatMessages = document.getElementById('chatMessages');
-            chatMessages.innerHTML = ''; // Clear existing messages
-            appendMessage("안녕하세요? (서비스 이름) 입니다.<br>재활용품과 관련하여 궁금한 것이 있으시다면 무엇이든지 물어보세요!<br>질문하고 싶은 내용을 직접 메시지를 입력하거나 이미지를 첨부해 주세요!", false);
-            appendMessage("<button class='send-button' onclick='sendRequest(\"usage\")'>사용방법을 알려줘</button> <button class='send-button' onclick='sendRequest(\"policy\")'>재활용품 지원정책을 알고싶어</button> <button class='send-button' onclick='sendRequest(\"how_to_dispose\")'>이건 어떻게 버려?</button>", false);
+            .catch(error => console.error('Error:', error));
         }
     </script>
 </body>
-
 </html>

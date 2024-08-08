@@ -15,5 +15,6 @@ def create_app():
 
     # 네임스페이스 등록
     api.add_namespace(chatbot_namespace, path='/chatbot')
+    
 
     return app

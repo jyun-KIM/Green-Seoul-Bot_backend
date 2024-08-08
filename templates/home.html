@@ -3,106 +3,142 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SeoulReChat Test Interface</title>
+    <title>SeoulReChat</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
+            background-color: #f8f9fa;
+            font-family: 'Arial', sans-serif;
             display: flex;
-            flex-direction: column;
-            align-items: center;
             justify-content: center;
+            align-items: center;
             height: 100vh;
             margin: 0;
         }
         .chat-container {
-            background-color: #fff;
+            width: 400px;
+            height: 600px;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .chat-header {
+            background-color: #343a40;
+            color: #ffffff;
+            padding: 10px;
+            text-align: center;
+        }
+        .chat-body {
+            flex: 1;
             padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            max-width: 400px;
-            width: 100%;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
         }
-        .chat-container h1 {
-            font-size: 24px;
-            margin-bottom: 10px;
-        }
-        .chat-container input[type="text"], .chat-container input[type="file"] {
-            width: calc(100% - 22px);
+        .chat-bubble {
+            background-color: #e9ecef;
+            border-radius: 10px;
             padding: 10px;
-            margin-bottom: 10px;
-            border-radius: 4px;
-            border: 1px solid #ccc;
-            box-sizing: border-box;
+            margin: 10px 0;
+            max-width: 80%;
         }
-        .chat-container button {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 5px;
-            border: none;
-            border-radius: 4px;
+        .chat-bubble.user {
             background-color: #007bff;
-            color: #fff;
-            cursor: pointer;
-            font-size: 16px;
+            color: #ffffff;
+            align-self: flex-end;
         }
-        .chat-container button:hover {
-            background-color: #0056b3;
+        .chat-bubble.bot {
+            background-color: #e9ecef;
+            color: #000000;
+            align-self: flex-start;
         }
-        .response {
-            margin-top: 20px;
+        .chat-footer {
+            display: flex;
             padding: 10px;
-            background-color: #f8f9fa;
-            border-radius: 4px;
-            border: 1px solid #ddd;
+            border-top: 1px solid #ced4da;
         }
-        .response p {
-            margin: 0 0 10px;
-            padding: 0;
+        .chat-input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 10px;
+            margin-right: 10px;
         }
-        .response a {
-            text-decoration: none;
-            color: #007bff;
-            display: block;
+        .chat-button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #ffffff;
+            border: none;
+            border-radius: 10px;
+        }
+        .btn-group-vertical {
+            display: flex;
+            flex-direction: column;
+        }
+        .btn-group-vertical button {
             margin-top: 5px;
         }
     </style>
 </head>
 <body>
     <div class="chat-container">
-        <h1>SeoulReChat Interface</h1>
-        <input type="text" id="userInput" placeholder="Enter your question...">
-        <input type="file" id="fileUpload">
-        <button onclick="sendRequest('upload-photo')">Upload Photo</button>
-        <button onclick="sendRequest('policy')">Get Policy Info</button>
-        <button onclick="sendRequest('chat')">Send Message</button>
-        <div class="response" id="responseContainer">
-            <!-- Response will be displayed here -->
+        <div class="chat-header">
+            AI 챗봇 서비스<br>(서비스 이름 넣기)
         </div>
+        <div class="chat-body" id="chat-body">
+            <div class="chat-bubble bot">
+                안녕하세요? (서비스 이름) 입니다. 재활용품과 관련하여 궁금한 것이 있으시면 무엇이든지 물어보세요!<br><br>
+                질문하고 싶은 내용을 직접 메시지를 입력하거나 이미지를 첨부해 주세요!
+            </div>
+            <div class="btn-group-vertical">
+                <button class="btn btn-secondary" onclick="sendMessage('(서비스 이름) 사용방법을 알려줘')">(서비스 이름) 사용방법을 알려줘</button>
+                <button class="btn btn-secondary" onclick="sendMessage('재활용품 지원정책을 알고싶어')">재활용품 지원정책을 알고싶어</button>
+                <button class="btn btn-secondary" onclick="sendMessage('이건 어떻게 버려?')">이건 어떻게 버려?</button>
+            </div>
+        </div>
+        <form class="chat-footer" onsubmit="handleSubmit(event)">
+            <input type="text" id="chat-input" class="chat-input" placeholder="메시지 입력">
+            <button type="submit" class="chat-button">전송</button>
+        </form>
     </div>
+
     <script>
-        function sendRequest(api) {
-            const userInput = document.getElementById('userInput').value;
-            const fileUpload = document.getElementById('fileUpload').files[0];
-            const apiUrl = `http://localhost:5000/chatbot/${api}`;
+        function sendMessage(message) {
+            const chatBody = document.getElementById('chat-body');
+            const userBubble = document.createElement('div');
+            userBubble.className = 'chat-bubble user';
+            userBubble.textContent = message;
+            chatBody.appendChild(userBubble);
 
-            const formData = new FormData();
-            if (userInput) formData.append('user_input', userInput);
-            if (fileUpload) formData.append('file', fileUpload);
-
-            fetch(apiUrl, {
+            // 서버에 메시지 전송 및 응답 처리
+            fetch('/chatbot/chat', {
                 method: 'POST',
-                body: formData
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ user_input: message })
             })
             .then(response => response.json())
             .then(data => {
-                const responseContainer = document.getElementById('responseContainer');
-                responseContainer.innerHTML = '';
-                const message = document.createElement('p');
-                message.textContent = data.message;
-                responseContainer.appendChild(message);
-            })
-            .catch(error => console.error('Error:', error));
+                const botBubble = document.createElement('div');
+                botBubble.className = 'chat-bubble bot';
+                botBubble.textContent = data.message;
+                chatBody.appendChild(botBubble);
+                chatBody.scrollTop = chatBody.scrollHeight;
+            });
+        }
+
+        function handleSubmit(event) {
+            event.preventDefault();
+            const chatInput = document.getElementById('chat-input');
+            const message = chatInput.value;
+            if (message.trim() !== '') {
+                sendMessage(message);
+                chatInput.value = '';
+            }
         }
     </script>
 </body>

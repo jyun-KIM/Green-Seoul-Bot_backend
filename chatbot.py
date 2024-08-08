@@ -5,6 +5,7 @@ import json
 import os
 from werkzeug.utils import secure_filename
 from models import define_models
+from config import logger
 
 app = Flask(__name__)
 api = Api(app)
@@ -18,26 +19,23 @@ chatbot_namespace = Namespace('chatbot', description='Chatbot operations')
 # 모델 정의 (Swagger에 나타낼 모델)
 image_upload_model, policy_info_model, user_input_model = define_models(chatbot_namespace)
 
+# 로그 시작
+logger.info("Application started!")
+
 # OpenAI GPT-3.5 Turbo 응답 생성 함수
-def get_response(user_input, chat_history):
+def get_response(user_input):
     try:
-        messages = [
-            {"role": "system", "content": f"Conversation history: {chat_history}"},
-            {"role": "user", "content": user_input}
-        ]
-    
-        # OpenAI API를 사용하여 GPT-3.5 Turbo 모델로부터 응답 생성
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             temperature=0.2,
             max_tokens=2000,
-            messages=messages
+            messages=[{"role": "user", "content": user_input}]
         )
-        
         chatgpt_output = response.choices[0].message['content']
+        logger.info(f"OpenAI GPT-3.5 Turbo 응답: {chatgpt_output}")  # 응답을 로그로 출력
         return chatgpt_output
     except Exception as e:
-        print(f"end=Error fetching response from OpenAI: {e}")
+        print(f"Error fetching response from OpenAI: {e}")
         return "죄송합니다. 현재 서비스를 제공할 수 없습니다. 나중에 다시 시도해 주세요."
 
 # 지역구 홈페이지 URL 로드 함수
@@ -67,7 +65,7 @@ class UploadPhoto(Resource):
 
         # 테스트
         recognized_result = "플라스틱 병" 
-        return jsonify({"message":r"인식된 물건은 {recognized_result}입니다."})
+        return jsonify({"message":f"인식된 물건은 {recognized_result}입니다."})
     
 # 정책 정보 조회
 @chatbot_namespace.route('/policy')
@@ -78,12 +76,21 @@ class Policy(Resource):
         data = request.json
         district_name = data.get('district_name')
 
-        # 테스트
-        message = f"{district_name}청 재활용품 지원 정책입니다."
-        return jsonify({"message": message})
+        if district_name not in district_websites:
+            return jsonify({"message": "해당 지역구의 정보를 찾을 수 없습니다."}), 400
+
+        # ChatGPT를 통해 응답 생성
+        user_input = f"{district_name} 정책정보 알려줘"
+        bot_response = get_response(user_input)
+        
+        # 정책 정보와 홈페이지 링크를 결합하여 반환
+        homepage_url = district_websites[district_name]
+        message = f"{bot_response}\n{district_name} 홈페이지: {homepage_url}"
+        return jsonify({"message": message, "homepage_url": homepage_url})
+
     
 # 사용자 입력 처리
-@chatbot_namespace
+@chatbot_namespace.route('/chat')
 class Chat(Resource):
     @chatbot_namespace.expect(user_input_model)
     def post(self):
@@ -93,6 +100,7 @@ class Chat(Resource):
 
         if not user_input:
             return jsonify({"message": "입력해주세요."}), 400
+        logger.info(f"사용자 입력: {user_input}, 챗봇 응답: {bot_response}")
         
         bot_response = get_response(user_input)
         return jsonify({"message": bot_response})

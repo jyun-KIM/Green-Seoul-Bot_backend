@@ -4,6 +4,7 @@ from flasgger import Swagger
 import os
 import pymysql
 from flask_restx import Api, Resource, fields, Namespace # Api 구현을 위한 객체 import
+import logging
 
 app = Flask(__name__)
 swagger = Swagger(app)
@@ -15,6 +16,10 @@ def configure_swagger(api):
 
 # OpenAI API 키 설정
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+
+# 로그 설정
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # DB 설정
 def create_app():

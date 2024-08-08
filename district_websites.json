@@ -1,9 +1,9 @@
 {
+    "관악구": "https://www.gwanak.go.kr",
     "강남구": "https://www.gangnam.go.kr",
     "강동구": "https://www.gangdong.go.kr",
     "강북구": "https://www.gangbuk.go.kr",
     "강서구": "https://www.gangseo.seoul.kr",
-    "관악구": "https://www.gwanak.go.kr",
     "광진구": "https://www.gwangjin.go.kr",
     "구로구": "https://www.guro.go.kr",
     "금천구": "https://www.geumcheon.go.kr",
@@ -13,7 +13,7 @@
     "동작구": "https://www.dongjak.go.kr",
     "마포구": "https://www.mapo.go.kr",
     "서대문구": "https://www.sdm.go.kr",
-    "서초구": "https://www.sdm.go.kr",
+    "서초구": "https://www.seocho.go.kr",
     "성동구": "https://www.sd.go.kr",
     "성북구": "https://www.sb.go.kr",
     "송파구": "https://www.songpa.go.kr",
@@ -21,7 +21,7 @@
     "영등포구": "https://www.ydp.go.kr",
     "용산구": "https://www.yongsan.go.kr",
     "은평구": "https://www.ep.go.kr",
-    "종로구": "https://www.Jongno.go.kr",
+    "종로구": "https://www.jongno.go.kr",
     "중구": "https://www.junggu.seoul.kr",
     "중랑구": "https://www.jungnang.go.kr"
 }

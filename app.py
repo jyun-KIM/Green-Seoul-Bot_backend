@@ -1,7 +1,7 @@
 from flask import Flask, render_template
 from config import create_app
 
-app = create_app()
+app, api = create_app()
 
 # html로 기능 테스트
 @app.route('/')

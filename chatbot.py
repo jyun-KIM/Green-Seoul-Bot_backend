@@ -68,7 +68,6 @@ class UploadPhoto(Resource):
         # 테스트
         recognized_result = "플라스틱 병" 
         return jsonify({"message":f"인식된 물건은 {recognized_result}입니다."})
-        return jsonify(response)
 
 # 정책 정보 조회
 @chatbot_namespace.route('/policy')
@@ -101,15 +100,19 @@ class Chat(Resource):
     def post(self):
         """사용자 입력처리"""
         data = request.json
-        user_input =data.get(user_input)
+        user_input = data.get(user_input)
 
         if not user_input:
             return jsonify({"message": "입력해주세요."}), 400
     
-        logger.info(f"사용자 입력: {user_input}, 챗봇 응답: {bot_response}")
-        
         bot_response = get_response(user_input)
+
+        logger.info(f"사용자 입력: {user_input}, 챗봇 응답: {bot_response}")
+
         return jsonify({"message": bot_response})
 
 # 네임스페이스 등록
 api.add_namespace(chatbot_namespace, path='/chatbot')
+
+if __name__ == '__main__':
+    app.run(debug=True)

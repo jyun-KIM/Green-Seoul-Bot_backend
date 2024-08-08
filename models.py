@@ -14,7 +14,7 @@ def define_models(chatbot_namespace):
         'user_input': fields.String(required=True, description='유저 인풋 텍스트')
     })
 
-    photo_upload_response_model = chatbot_namespace.model('ImageUploadResponseDTO', {
+    image_upload_response_model = chatbot_namespace.model('ImageUploadResponseDTO', {
         'message': fields.String(description='Response message')
     })
 
@@ -27,4 +27,4 @@ def define_models(chatbot_namespace):
         'message': fields.String(description='Response message from ChatGPT')
     })
 
-    return image_upload_model, policy_info_model, user_input_model, photo_upload_response_model, policy_info_response_model, chat_response_model
+    return image_upload_model, policy_info_model, user_input_model, image_upload_response_model, policy_info_response_model, chat_response_model

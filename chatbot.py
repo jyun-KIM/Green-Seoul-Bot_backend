@@ -1,11 +1,12 @@
 from flask import Flask, request, jsonify
 from flask_restx import Api, Namespace, Resource, fields
 import openai
-import json
 import os
 from werkzeug.utils import secure_filename
 from models import define_models
 from config import logger
+from dto import ImageUploadDTO, PolicyInfoDTO, UserInputDTO, ImageUploadResponseDTO, PolicyInfoResponseDTO, ChatResponseDTO
+import json
 
 app = Flask(__name__)
 api = Api(app)
@@ -17,7 +18,7 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 chatbot_namespace = Namespace('chatbot', description='Chatbot operations')
 
 # 모델 정의 (Swagger에 나타낼 모델)
-image_upload_model, policy_info_model, user_input_model = define_models(chatbot_namespace)
+image_upload_model, policy_info_model, user_input_model, photo_upload_response_model, policy_info_response_model, chat_response_model = define_models(chatbot_namespace)
 
 # 로그 시작
 logger.info("Application started!")
@@ -50,6 +51,7 @@ district_websites = load_district_websites()  # 지역구 홈페이지 로드
 @chatbot_namespace.route('/upload')
 class UploadPhoto(Resource):
     @chatbot_namespace.expect(image_upload_model)
+    @chatbot_namespace.response(200, 'Success', ImageUploadResponseDTO)
     def post(self):
         """사진 업로드 처리"""
         file = request.files.get('file')
@@ -66,11 +68,13 @@ class UploadPhoto(Resource):
         # 테스트
         recognized_result = "플라스틱 병" 
         return jsonify({"message":f"인식된 물건은 {recognized_result}입니다."})
-    
+        return jsonify(response)
+
 # 정책 정보 조회
 @chatbot_namespace.route('/policy')
 class Policy(Resource):
     @chatbot_namespace.expect(policy_info_model)
+    @chatbot_namespace.response(200, 'Success', PolicyInfoResponseDTO)
     def post(self):
         """정책 정보 조회"""
         data = request.json
@@ -93,6 +97,7 @@ class Policy(Resource):
 @chatbot_namespace.route('/chat')
 class Chat(Resource):
     @chatbot_namespace.expect(user_input_model)
+    @chatbot_namespace.response(200, 'Success', chat_response_model)
     def post(self):
         """사용자 입력처리"""
         data = request.json
@@ -100,7 +105,11 @@ class Chat(Resource):
 
         if not user_input:
             return jsonify({"message": "입력해주세요."}), 400
+    
         logger.info(f"사용자 입력: {user_input}, 챗봇 응답: {bot_response}")
         
         bot_response = get_response(user_input)
         return jsonify({"message": bot_response})
+
+# 네임스페이스 등록
+api.add_namespace(chatbot_namespace, path='/chatbot')

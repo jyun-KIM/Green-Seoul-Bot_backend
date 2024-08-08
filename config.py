@@ -1,29 +1,31 @@
-from flask import Flask, Blueprint, jsonify, request
+from flask import Flask
 from flask_cors import CORS
 from flasgger import Swagger
 import os
 import pymysql
-from flask_restx import Api, Resource, fields, Namespace # Api 구현을 위한 객체 import
 import logging
 
 app = Flask(__name__)
 swagger = Swagger(app)
 
-# swagger 설정
-def configure_swagger(api):
-    api.title = 'Chatbot API'
-    api.version = '1.0'
-
-# OpenAI API 키 설정
-OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
-
 # 로그 설정
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# DB 설정
+# OpenAI API 키 설정
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+
+# swagger 설정
+def configure_swagger(app):
+    swagger = Swagger(app)
+    app.config['SWAGGER'] = {
+        'title': 'Chatbot API',
+        'uiversion': 3
+    }
+
+# Flask 애플리케이션 생성
 def create_app():
-    app = Flask(__name__) # Flask 애플리케이션을 생성
+    app = Flask(__name__)
 
     # CORS 설정 추가
     CORS(app)
@@ -31,6 +33,10 @@ def create_app():
     # Swagger 설정
     swagger = Swagger(app)
     configure_swagger(swagger)
+
+# DB 설정
+def create_app():
+    app = Flask(__name__) # Flask 애플리케이션을 생성
 
     # DB 연동
     try:
@@ -49,7 +55,7 @@ def create_app():
         # cursor.getchmany(n) # n개의 데이터 가져오기
 
         # 수정 사항 db에 저장
-        db.commit
+        db.commit()
 
         # 데이터베이스 닫기
         # db.close()

@@ -18,7 +18,7 @@ class UserInputDTO:
 
 # 사진 업로드 응답 DTO
 @dataclass
-class PhotoUploadResponseDTO:
+class ImageUploadResponseDTO:
     message: str
 
 # 정책 정보 응답 DTO

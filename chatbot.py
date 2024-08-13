@@ -4,6 +4,7 @@ import openai
 import os
 from werkzeug.utils import secure_filename
 from config import logger
+from generate_chatbot import load_docs, create_vectorstore, create_rag_chain
 import json
 
 

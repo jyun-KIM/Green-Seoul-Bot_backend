@@ -180,11 +180,12 @@ class Chat(Resource):
         bot_response = get_response(user_input)
         #print(bot_response)
         answer = bot_response['answer']
-        print(answer)
+        #print(bot_response)
 
         #logger.info(f"챗봇 응답: {bot_response}")
 
         return jsonify({"message": answer})
+
 
 
 if __name__ == '__main__':

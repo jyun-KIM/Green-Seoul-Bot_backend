@@ -6,6 +6,7 @@ from werkzeug.utils import secure_filename
 from models import define_models
 from config import logger
 from dto import ImageUploadDTO, PolicyInfoDTO, UserInputDTO, ImageUploadResponseDTO, PolicyInfoResponseDTO, ChatResponseDTO
+from generate_chatbot import load_docs, create_vectorstore, create_rag_chain
 import json
 
 # DTO랑 Model 없애기
@@ -25,7 +26,8 @@ image_upload_model, policy_info_model, user_input_model, photo_upload_response_m
 # 로그 시작
 logger.info("Application started!")
 
-# OpenAI GPT-3.5 Turbo 응답 생성 함수
+# OpenAI GPT-4o 응답 생성 함수
+'''
 def get_response(user_input):
     try:
         response = openai.ChatCompletion.create(
@@ -40,6 +42,30 @@ def get_response(user_input):
     except Exception as e:
         print(f"Error fetching response from OpenAI: {e}")
         return "죄송합니다. 현재 서비스를 제공할 수 없습니다. 나중에 다시 시도해 주세요."
+        '''
+    
+def get_response(user_input):
+    try:
+        # 문서 로드 및 벡터 스토어 생성
+        documents = load_docs() 
+        vectorstore = create_vectorstore(documents)
+
+        # RetrievalQA 체인 생성
+        qa_chain = create_rag_chain(vectorstore)
+
+        # 예제 질문에 대한 답변 생성
+        #question = "강서구 지원정책 알려줘"
+        #answer = qa_chain.invoke({"input": question})
+        answer = qa_chain.invoke({"input": user_input})
+
+        print("dd")
+
+        return answer
+    
+    except Exception as e:
+        print(f"Error fetching response from OpenAI: {e}")
+        return "죄송합니다. 현재 서비스를 제공할 수 없습니다. 나중에 다시 시도해 주세요."
+
 
 # 지역구 홈페이지 URL 로드 함수
 def load_district_websites():
@@ -102,17 +128,21 @@ class Chat(Resource):
     @Chatbot.response(200, 'Success', chat_response_model)
     def post(self):
         """사용자 입력처리"""
-        data = request.json
-        user_input = data.get(user_input)
+        #data = request.json.get("")
+        user_input = request.json.get('user_input')
+        
 
         if not user_input:
             return jsonify({"message": "입력해주세요."}), 400
     
         bot_response = get_response(user_input)
+        #print(bot_response)
+        answer = bot_response['answer']
+        print(answer)
 
-        logger.info(f"사용자 입력: {user_input}, 챗봇 응답: {bot_response}")
+        #logger.info(f"챗봇 응답: {bot_response}")
 
-        return jsonify({"message": bot_response})
+        return jsonify({"message": answer})
 
 
 if __name__ == '__main__':

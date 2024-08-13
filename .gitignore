@@ -1,1 +1,6 @@
 .env
+
+# 가상환경 설정
+/myenv
+
+text.txt

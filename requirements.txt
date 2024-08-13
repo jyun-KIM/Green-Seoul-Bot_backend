@@ -13,10 +13,9 @@ MarkupSafe==2.1.5
 itsdangerous==2.2.0
 click==8.1.7
 colorama==0.4.6
-langchain_community
-flask_cors
-langchain_openai
-python-dotenv 
-Chroma  
-chromadb
-faiss-cpu
+langchain_community==0.2.12
+flask_cors==4.0.1
+langchain_openai==0.1.21
+python-dotenv==1.0.1
+chromadb==0.5.5
+faiss-cpu==1.8.0.post1

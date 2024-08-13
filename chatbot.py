@@ -4,11 +4,6 @@ import openai
 import os
 from werkzeug.utils import secure_filename
 from config import logger
-<<<<<<< HEAD
-from dto import ImageUploadDTO, PolicyInfoDTO, UserInputDTO, ImageUploadResponseDTO, PolicyInfoResponseDTO, ChatResponseDTO
-from generate_chatbot import load_docs, create_vectorstore, create_rag_chain
-=======
->>>>>>> origin/main
 import json
 
 
@@ -173,19 +168,10 @@ class Policy(Resource):
 @Chatbot.route('/chat')
 class Chat(Resource):
     def post(self):
-<<<<<<< HEAD
         """사용자 입력처리"""
         #data = request.json.get("")
         user_input = request.json.get('user_input')
         
-=======
-        """사용자 입력 처리"""
-        if not request.is_json:
-            return jsonify({"message": "JSON 형식으로 요청해주세요."}), 400
-        
-        data = request.get_json()
-        user_input = data.get('user_input')
->>>>>>> origin/main
 
         if not user_input:
             return jsonify({"message": "입력해주세요."}), 400

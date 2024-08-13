@@ -70,18 +70,3 @@ def create_rag_chain(vectorstore):
 
     return qa_chain
 
-
-def run(user_input):
-    # 문서 로드 및 벡터 스토어 생성
-    documents = load_docs() 
-    vectorstore = create_vectorstore(documents)
-
-    # RetrievalQA 체인 생성
-    qa_chain = create_rag_chain(vectorstore)
-
-    # 예제 질문에 대한 답변 생성
-    #question = "강서구 지원정책 알려줘"
-    #answer = qa_chain.invoke({"input": question})
-    answer = qa_chain.invoke({"input": user_input})
-
-    return answer

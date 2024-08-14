@@ -182,7 +182,6 @@ class Chat(Resource):
         answer = bot_response['answer']
         print(answer)
 
-        #logger.info(f"챗봇 응답: {bot_response}")
 
         return jsonify({"message": answer})
 

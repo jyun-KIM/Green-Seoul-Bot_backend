@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, Response, jsonify
 from flask_restx import Api, Namespace, Resource
 import openai
 import os
@@ -21,23 +21,6 @@ Chatbot = Namespace('Chatbot')
 logger.info("Application started!")
 
 # OpenAI GPT-4o 응답 생성 함수
-'''
-def get_response(user_input):
-    try:
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            temperature=0.2,
-            max_tokens=2000,
-            messages=[{"role": "user", "content": user_input}]
-        )
-        chatgpt_output = response['choices'][0]['message']['content']
-        logger.info(f"OpenAI GPT-3.5 Turbo 응답: {chatgpt_output}")  # 응답을 로그로 출력
-        return chatgpt_output
-    except Exception as e:
-        logger.error(f"Error fetching response from OpenAI: {e}")
-        return "죄송합니다. 현재 서비스를 제공할 수 없습니다. 나중에 다시 시도해 주세요."
-        '''
-    
 def get_response(user_input):
     try:
         # 문서 로드 및 벡터 스토어 생성
@@ -53,6 +36,7 @@ def get_response(user_input):
         answer = qa_chain.invoke({"input": user_input})
 
         print("dd")
+        
 
         return answer
     
@@ -61,26 +45,28 @@ def get_response(user_input):
         return "죄송합니다. 현재 서비스를 제공할 수 없습니다. 나중에 다시 시도해 주세요."
 
 
-# 테스트용 엔드포인트
-@Chatbot.route('/test')
-class TestAPI(Resource):
+# 사용자 입력 처리
+@Chatbot.route('/chat')
+class Chat(Resource):
     def post(self):
-        """OpenAI API 테스트"""
-        if not request.is_json:
-            return jsonify({"message": "JSON 형식으로 요청해주세요."}), 400
+        """사용자 입력처리"""
+        try:
+            # JSON 형식으로 사용자 입력 받기
+            data = request.get_json()
+            user_input = data.get("user_input")
 
-        data = request.get_json()
-        user_input = data.get('user_input')
+            if not user_input:
+                return jsonify({"error": "입력이 필요합니다."}), 400
 
-        if not user_input:
-            return jsonify({"message": "입력해주세요."}), 400
+            # OpenAI API를 통해 응답 생성
+            response = get_response(user_input)
 
-        bot_response = get_response(user_input)
-
-        # API 응답 반환
-        return jsonify({"message": bot_response}), 200
-
-
+            # 응답 반환
+            return Response(response, mimetype='application/json')
+        
+        except Exception as e:
+            logger.error(f"Error processing user input: {e}")
+            return jsonify({"error": "응답을 생성하는 중 오류가 발생했습니다."}), 500
 
 
 # 지역구 홈페이지 URL 로드 함수
@@ -101,6 +87,7 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 # 파일 확장자 확인 함수
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 
 # 사진 업로드 처리
 @Chatbot.route('/upload')
@@ -139,6 +126,7 @@ class UploadPhoto(Resource):
             logger.error(f"Error during file upload: {e}", exc_info=True)  # 에러 로그 추가
             return jsonify({"message": "서버 오류가 발생했습니다.", "error": str(e)}), 500
 
+
 # 정책 정보 조회
 @Chatbot.route('/policy')
 class Policy(Resource):
@@ -165,25 +153,6 @@ class Policy(Resource):
         message = f"{bot_response}\n{district_name} 홈페이지: {homepage_url}"
         return jsonify({"message": message, "homepage_url": homepage_url})
     
-# 사용자 입력 처리
-@Chatbot.route('/chat')
-class Chat(Resource):
-    def post(self):
-        """사용자 입력처리"""
-        #data = request.json.get("")
-        user_input = request.json.get('user_input')
-        
-
-        if not user_input:
-            return jsonify({"message": "입력해주세요."}), 400
-    
-        bot_response = get_response(user_input)
-        #print(bot_response)
-        answer = bot_response['answer']
-        print(answer)
-
-
-        return jsonify({"message": answer})
 
 
 if __name__ == '__main__':

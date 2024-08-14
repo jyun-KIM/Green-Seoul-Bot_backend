@@ -22,6 +22,5 @@ def create_app():
     # API 객체 생성 및 앱에 등록
     api = Api(app, title='Chatbot API', version='1.0', description='A simple Chatbot API')
 
-# AWS
 
     return app, api

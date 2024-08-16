@@ -29,10 +29,7 @@ def get_response(user_input):
 
         # RetrievalQA 체인 생성
         qa_chain = create_rag_chain(vectorstore)
-
         answer = qa_chain.invoke({"input": user_input})
-
-        print("dd")
 
         return answer
     
@@ -127,23 +124,26 @@ class Policy(Resource):
         if not request.is_json:
             return jsonify({"message": "JSON 형식으로 요청해주세요."}), 400
         
-        data = request.get_json()
-        district_name = data.get('district_name')
+        districtData = request.get_json('district_name')
+        district_name = districtData['district_name']
+        print(district_name)
 
         if not district_name:
             return jsonify({"message": "지역구 이름을 입력해주세요."}), 400
 
+        '''
         if district_name not in district_websites:
+            print("fd")
             return jsonify({"message": "해당 지역구의 정보를 찾을 수 없습니다."}), 400
+        '''
+
     # ChatGPT를 통해 응답 생성
-        user_input = f"{district_name} 정책정보 알려줘"
-        bot_response = get_response(user_input)
-        answer = bot_response['answer']
+        bot_response = get_response(district_name)
+        message = bot_response['answer']
       
         
         # 정책 정보와 홈페이지 링크를 결합하여 반환
-        homepage_url = district_websites[district_name]
-        message = f"{answer}\n{district_name} 홈페이지: {homepage_url}"
+        homepage_url = next(item["district_url"] for item in district_websites if item["district_name"] == district_name)
         
         #gpt가 만든 답변은 필요 없음. message :"송파구"만 있으면 +url 
         
@@ -154,8 +154,9 @@ class Policy(Resource):
 class Chat(Resource):
     def post(self):
         """사용자 입력처리"""
-        #data = request.json.get("")
-        user_input = request.json.get('user_input')
+        data = request.get_json('user_input')
+        print(data)
+        user_input = data['user_input']
         
 
         if not user_input:

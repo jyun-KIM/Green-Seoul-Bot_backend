@@ -20,24 +20,7 @@ Chatbot = Namespace('Chatbot')
 # 로그 시작
 logger.info("Application started!")
 
-# OpenAI GPT-4o 응답 생성 함수
-'''
-def get_response(user_input):
-    try:
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            temperature=0.2,
-            max_tokens=2000,
-            messages=[{"role": "user", "content": user_input}]
-        )
-        chatgpt_output = response['choices'][0]['message']['content']
-        logger.info(f"OpenAI GPT-3.5 Turbo 응답: {chatgpt_output}")  # 응답을 로그로 출력
-        return chatgpt_output
-    except Exception as e:
-        logger.error(f"Error fetching response from OpenAI: {e}")
-        return "죄송합니다. 현재 서비스를 제공할 수 없습니다. 나중에 다시 시도해 주세요."
-        '''
-    
+# OpenAI GPT-4o 응답 생성 함수    
 def get_response(user_input):
     try:
         # 문서 로드 및 벡터 스토어 생성
@@ -47,9 +30,6 @@ def get_response(user_input):
         # RetrievalQA 체인 생성
         qa_chain = create_rag_chain(vectorstore)
 
-        # 예제 질문에 대한 답변 생성
-        #question = "강서구 지원정책 알려줘"
-        #answer = qa_chain.invoke({"input": question})
         answer = qa_chain.invoke({"input": user_input})
 
         print("dd")
@@ -155,14 +135,18 @@ class Policy(Resource):
 
         if district_name not in district_websites:
             return jsonify({"message": "해당 지역구의 정보를 찾을 수 없습니다."}), 400
-
-        # ChatGPT를 통해 응답 생성
+    # ChatGPT를 통해 응답 생성
         user_input = f"{district_name} 정책정보 알려줘"
         bot_response = get_response(user_input)
+        answer = bot_response['answer']
+      
         
         # 정책 정보와 홈페이지 링크를 결합하여 반환
         homepage_url = district_websites[district_name]
-        message = f"{bot_response}\n{district_name} 홈페이지: {homepage_url}"
+        message = f"{answer}\n{district_name} 홈페이지: {homepage_url}"
+        
+        #gpt가 만든 답변은 필요 없음. message :"송파구"만 있으면 +url 
+        
         return jsonify({"message": message, "homepage_url": homepage_url})
     
 # 사용자 입력 처리
@@ -178,11 +162,7 @@ class Chat(Resource):
             return jsonify({"message": "입력해주세요."}), 400
     
         bot_response = get_response(user_input)
-        #print(bot_response)
         answer = bot_response['answer']
-        #print(bot_response)
-
-        #logger.info(f"챗봇 응답: {bot_response}")
 
         return jsonify({"message": answer})
 

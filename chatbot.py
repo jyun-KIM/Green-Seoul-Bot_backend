@@ -167,10 +167,22 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 # 허용된 파일 확장자
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
-# 파일 확장자 확인 함수
+# 허용된 파일 확장자인지 확인
 def allowed_file(filename):
-    """허용된 파일 확장자인지 확인"""
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+# 파일 경로에서 district 정보를 불러오는 함수
+def get_district_url(district_name):
+    """district_name에 맞는 district_url을 반환"""
+    try:
+        with open('district_websites.json', 'r', encoding='utf-8') as f:
+            district_data = json.load(f)
+        for district in district_data:
+            if district['district_name'] == district_name:
+                return district['district_url']
+    except FileNotFoundError:
+        logger.error("District websites JSON file not found.")
+    return None
 
 # 사진 업로드 처리
 @Chatbot.route('/upload')
@@ -178,6 +190,18 @@ class UploadPhoto(Resource):
     def post(self):
         """사진 업로드 처리"""
         try:
+            # 요청 JSON에서 데이터 추출
+            district_name = request.form.get('district_name')
+            if not district_name:
+                logger.error("district_name이 제공되지 않았습니다.")
+                return {"error": "district_name이 제공되지 않았습니다."}, 400
+            
+            # district_name에 맞는 URL 검색
+            district_url = get_district_url(district_name)
+            if not district_url:
+                logger.error(f"'{district_name}'에 해당하는 구를 찾을 수 없습니다.")
+                return {"error": f"'{district_name}'에 해당하는 구를 찾을 수 없습니다."}, 400
+
             # 파일이 제대로 업로드 되었는지 확인
             if 'image_file' not in request.files:
                 logger.error("파일이 없습니다.")
@@ -204,12 +228,15 @@ class UploadPhoto(Resource):
             file.save(file_path)
             logger.info(f"파일이 성공적으로 저장되었습니다: {file_path}")
 
-            # 응답 반환 (문자열로 인식된 물건을 반환)
-            recognized_result = "플라스틱 병"  # 여기서 실제로 yolo 모델이 분석한 결과를 반환해야 함
-            return {"message": f"인식된 물건은 {recognized_result}입니다."}, 200
+            # 응답 반환
+            recognized_result = "플라스틱 병"  # 여기서 yolo 모델이 분석한 결과를 반환해야 함
+            return {
+                "district_name": district_name,
+                "message": f"이 대형폐기물은 {recognized_result}입니다.",
+                "district_url": district_url
+            }, 200
 
         except Exception as e:
-            # 오류 발생 시 로그 기록 후 에러 메시지 반환
             logger.error(f"Error processing image upload: {e}", exc_info=True)
             return {"error": "이미지 처리 중 오류가 발생했습니다."}, 500
         

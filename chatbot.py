@@ -1,4 +1,4 @@
-from flask import Flask, request, Response, jsonify
+from flask import Flask, request, jsonify
 from flask_restx import Api, Namespace, Resource
 import openai
 import os
@@ -59,23 +59,64 @@ class Chat(Resource):
                 return jsonify({"error": "입력이 필요합니다."}), 400
 
             # OpenAI API를 통해 응답 생성
-            response = get_response(user_input)
+            message, district_message = get_response(user_input)
 
             # 응답 반환
-            return Response(response, mimetype='application/json')
+            return jsonify({
+                "message": message,
+                "district_message": district_message
+            })
         
         except Exception as e:
             logger.error(f"Error processing user input: {e}")
             return jsonify({"error": "응답을 생성하는 중 오류가 발생했습니다."}), 500
 
 
-# 지역구 홈페이지 URL 로드 함수
-def load_district_websites():
-    with open('district_websites.json', 'r', encoding='utf-8') as file:
-        return json.load(file)
+def load_district_data():
+    """JSON 파일에서 구 이름과 URL 데이터를 로드"""
+    with open('district_websites.json', 'r', encoding='utf-8') as f:
+        district_data = json.load(f)
+    return district_data
 
-# JSON 파일에서 데이터 로드
-district_websites = load_district_websites()  # 지역구 홈페이지 로드
+# 정책 정보 조회
+@Chatbot.route('/policy')
+class Policy(Resource):
+    def post(self):
+        """정책 정보 조회"""
+        try:
+            # JSON 형식으로 사용자 입력 받기
+            data = request.get_json()
+            district_name = data.get("district_name")
+
+            if not district_name:
+                return jsonify({"error": "district_name field is required"}), 400
+
+            # 구 정보 로드
+            district_data = load_district_data()
+            
+            # 입력된 구 이름과 일치하는 구 정보 찾기
+            for district in district_data:
+                if district["district_name"] == district_name:
+                    # 구 이름과 URL을 반환
+                    response_message = f"{district_name} 지원 정책 정보입니다."
+                    response_url = district["district_url"]
+                    
+                    # OpenAI API를 통해 대답 생성
+                    openai_response = get_response(response_message)
+                    
+                    return jsonify({
+                        "message": openai_response,
+                        "district_url": response_url
+                    })
+            
+            # 입력된 구 이름이 목록에 없을 경우
+            return jsonify({"error": f"No data found for district: {district_name}"}), 404
+
+        except Exception as e:
+            logger.error(f"Error processing policy request: {e}")
+            return jsonify({"error": "Internal server error"}), 500
+
+
 
 # 파일이 저장될 디렉토리
 UPLOAD_FOLDER = 'uploads'
@@ -86,8 +127,9 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 # 파일 확장자 확인 함수
 def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
+    """허용된 파일 확장자인지 확인"""
+    return '.' in filename and \
+        filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # 사진 업로드 처리
 @Chatbot.route('/upload')
@@ -101,58 +143,33 @@ class UploadPhoto(Resource):
             
             file = request.files['image_file']
 
-            # 파일 이름이 있는지 확인
+            # 파일이 없거나 빈 파일인지 확인
             if file.filename == '':
-                return jsonify({"message": "파일 이름이 비어 있습니다."}), 400
+                return jsonify({"message": "파일이 비어 있습니다."}), 400
 
-            # 파일이 허용된 형식인지 확인
+                        # 파일 확장자 확인
             if file and allowed_file(file.filename):
                 filename = secure_filename(file.filename)
-                file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
                 
-                # 디렉토리가 없으면 생성
-                os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+                # 파일을 서버의 임시 디렉터리에 저장
+                filepath = os.path.join("/tmp", filename)
+                file.save(filepath)
                 
-                # 파일 저장
-                file.save(file_path)
+                ### 이미지 인식 프로세스를 수행 & 결과 반환.
 
-                # 파일 업로드 성공 메시지 반환 (예: 인식된 물체 이름을 반환)
-                recognized_result = "can"  # 여기에 실제 인식 결과를 넣을 수 있습니다.
-                return jsonify({"message": f"The object recognized is a {recognized_result}"}), 200
+
+                # 예시로 객체를 "캔"으로 인식했다고 가정합니다.
+                recognized_object = "can"
+                message = f"The recognized object is a {recognized_object}. The {recognized_object} is emptied of its contents and discharged without adding any foreign substances."
+                
+                return jsonify({"message": message})
             else:
-                return jsonify({"message": "허용되지 않는 파일 형식입니다."}), 400
+                return jsonify({"error": "Invalid file type"}), 400
         
         except Exception as e:
             logger.error(f"Error during file upload: {e}", exc_info=True)  # 에러 로그 추가
             return jsonify({"message": "서버 오류가 발생했습니다.", "error": str(e)}), 500
 
-
-# 정책 정보 조회
-@Chatbot.route('/policy')
-class Policy(Resource):
-    def post(self):
-        """정책 정보 조회"""
-        if not request.is_json:
-            return jsonify({"message": "JSON 형식으로 요청해주세요."}), 400
-        
-        data = request.get_json()
-        district_name = data.get('district_name')
-
-        if not district_name:
-            return jsonify({"message": "지역구 이름을 입력해주세요."}), 400
-
-        if district_name not in district_websites:
-            return jsonify({"message": "해당 지역구의 정보를 찾을 수 없습니다."}), 400
-
-        # ChatGPT를 통해 응답 생성
-        user_input = f"{district_name} 정책정보 알려줘"
-        bot_response = get_response(user_input)
-        
-        # 정책 정보와 홈페이지 링크를 결합하여 반환
-        homepage_url = district_websites[district_name]
-        message = f"{bot_response}\n{district_name} 홈페이지: {homepage_url}"
-        return jsonify({"message": message, "homepage_url": homepage_url})
-    
 
 
 if __name__ == '__main__':

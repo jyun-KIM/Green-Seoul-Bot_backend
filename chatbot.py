@@ -18,35 +18,7 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 Chatbot = Namespace('Chatbot')
 
 # 로그 시작
-logger.info("Application started!")
-
-
-# 사용자 입력 처리
-@Chatbot.route('/chat')
-class Chat(Resource):
-    def post(self):
-        """사용자 입력처리"""
-        try:
-            # JSON 형식으로 사용자 입력 받기
-            data = request.get_json()
-            user_input = data.get("user_input")
-
-            if not user_input:
-                return jsonify({"error": "입력이 필요합니다."}), 400
-
-            # OpenAI API를 통해 응답 생성
-            message, district_message = get_response(user_input)
-
-            # 응답 반환
-            return jsonify({
-                "message": message,
-                "district_message": district_message
-            })
-        
-        except Exception as e:
-            logger.error(f"Error processing user input: {e}")
-            return jsonify({"error": "응답을 생성하는 중 오류가 발생했습니다."}), 500
-
+logger.info("로그 시작")
 
 
 # OpenAI GPT-4 응답 생성 함수
@@ -70,7 +42,7 @@ def get_response(user_input):
 
         # 특정 지역 메시지를 추가 (예시)
         district_message = f"{user_input.split()[0]} 지원정책입니다."
-
+        
         return message, district_message
     
     except Exception as e:
@@ -78,86 +50,110 @@ def get_response(user_input):
         return "죄송합니다. 현재 서비스를 제공할 수 없습니다. 나중에 다시 시도해 주세요.", ""
 
 
-# JSON 파일의 district 데이터를 메모리로 로드
-with open('districts.json', 'r', encoding='utf-8') as f:
-    districts_data = json.load(f)
+# 사용자 입력 처리
+@Chatbot.route('/chat', methods=['POST'])
+class Chat(Resource):
+    def post(self):
+        """사용자 입력처리"""
+        try:
+            # JSON 형식으로 사용자 입력 받기
+            data = request.get_json()
+            user_input = data.get("user_input")
 
-# district_websites.json 파일을 로드
-with open('district_websites.json', 'r', encoding='utf-8') as f:
-    district_websites = json.load(f)
+            if not user_input:
+                return jsonify({"error": "district_name 입력이 필요합니다."}), 400
 
-def get_policy_info(district_name):
+            # OpenAI API를 통해 응답 생성
+            message, district_message = get_response(user_input)
+
+            # 응답 반환
+            return jsonify({
+                "message": message,
+                "district_message": district_message
+            })
+        
+        except Exception as e:
+            logger.error(f"Error processing user input: {e}")
+            return jsonify({"error": "응답을 생성하는 중 오류가 발생했습니다."}), 500
+
+
+
+# JSON 파일에서 지역 정보를 로드하는 함수
+def load_districts():
     try:
-        documents = load_docs()
-        vectorstore = create_vectorstore(documents)
-        qa_chain = create_rag_chain(vectorstore)
+        with open('districts.json', 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            logger.info("districts.json 로드 성공")
+            return data["districts"]
+    except FileNotFoundError:
+        logger.error("districts.json 파일을 찾을 수 없습니다.")
+        return []
 
-        question = f"{district_name} 지원정책 알려줘"
-        answer = qa_chain.invoke({"input": question})
+# 정책 정보를 생성하는 함수
+def generate_policy_info(district_name):
+    try:
+        # OpenAI API를 사용하여 메시지 생성 (sia 모델로 갈아끼워야함)
+        response = openai.Completion.create(
+            engine="text-davinci-003",
+            prompt=f"{district_name} 정책에 대해 알려줘",
+            max_tokens=150,
+            temperature=0.5,
+        )
 
-        # 반환 값이 딕셔너리일 경우 'text' 키 확인
-        if isinstance(answer, dict) and 'text' in answer:
-            return answer['text']  # 텍스트만 반환
+        # 응답 메시지 추출
+        message = response.choices[0].text.strip()
 
-        return str(answer)  # 직렬화 가능하게 문자열로 변환
+        # JSON 파일에서 지역 정보를 로드
+        districts = load_districts()
+
+        # 로드된 JSON 데이터 로그 출력 (디버깅 용도)
+        logger.info(f"로드된 지역 데이터: {districts}")
+
+        # 지역에 맞는 URL 찾기
+        district_url = None
+        for district in districts:
+            # 비교 시 대소문자 무시하고 공백 제거
+            if district["title"].strip().lower() == district_name.strip().lower():
+                district_url = district["district_url"]
+                break
+
+        # URL을 찾지 못한 경우 기본 URL 설정
+        if not district_url:
+            return district_name, "정책 정보를 불러오는 중 해당 지역의 정보를 찾지 못했습니다.", ""
+
+        return district_name, message, district_url
+
     except Exception as e:
-        logger.error(f"Error fetching policy information: {e}")
-        return None
+        logger.error(f"Error fetching response from OpenAI: {e}")
+        return district_name, "정책 정보를 불러오는 중 오류가 발생했습니다.", ""
     
-# district_name으로 district_url을 찾는 함수
-def get_district_url(district_name):
-    district_info = next((district for district in district_websites 
-                        if district['district_name'] == district_name), None)
-    
-    return district_info['district_url'] if district_info else None
 
-# 정책 정보 조회
-@Chatbot.route('/policy')
+# 정책 엔드포인트 정의
+@Chatbot.route('/policy', methods=['POST'])
 class Policy(Resource):
     def post(self):
         """정책 정보 조회"""
         try:
-            # 요청으로부터 district_name 받기
+            # JSON 형식으로 사용자 입력 받기
             data = request.get_json()
             district_name = data.get("district_name")
 
             if not district_name:
-                return jsonify({"error": "district_name이 필요합니다."}), 400
+                return jsonify({"error": "지역 이름이 필요합니다."}), 400
 
-            # 입력된 district_name을 districts.json에서 검색
-            # (정책 정보 txt인지 확인필요)
-            district_info = next((district for district in districts_data['districts'] 
-                                if district['title'] == district_name), None)
-            
-            if not district_info:
-                return jsonify({"error": f"'{district_name}'에 대한 정보를 찾을 수 없습니다."}), 404
-
-            # OpenAI API를 통해 해당 구의 정책 정보 생성
-            policy = get_policy_info(district_name)
-
-            if policy is None:
-                return jsonify({"error": f"'{district_name}'에 대한 정책 정보를 가져오는 중 오류가 발생했습니다."}), 500
-
-            # district_websites.json에서 URL 찾기
-            district_url = get_district_url(district_name)
-
-            if district_url is None:
-                return jsonify({"error": f"'{district_name}'에 대한 URL 정보를 찾을 수 없습니다."}), 404
+            # 정책 정보 생성
+            district_name, message, district_url = generate_policy_info(district_name)
 
             # 응답 반환
             return jsonify({
                 "district_name": district_name,
-                "message": policy,
+                "message": message,
                 "district_url": district_url
             })
 
         except Exception as e:
-            logger.error(f"정책 정보를 처리하는 중 오류 발생: {e}", exc_info=True)
-            return jsonify({"error": "정책 정보를 조회하는 중 오류가 발생했습니다.", "details": str(e)}), 500
-        
-
-
-
+            logger.error(f"Error processing policy request: {e}")
+            return jsonify({"error": "정책 정보를 생성하는 중 오류가 발생했습니다."}), 500
 
 
 # 파일이 저장될 디렉토리
@@ -185,7 +181,7 @@ def get_district_url(district_name):
     return None
 
 # 사진 업로드 처리
-@Chatbot.route('/upload')
+@Chatbot.route('/upload', methods=['POST'])
 class UploadPhoto(Resource):
     def post(self):
         """사진 업로드 처리"""

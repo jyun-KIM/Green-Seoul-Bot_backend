@@ -40,7 +40,7 @@ def get_response(user_input):
         else:
             message = str(answer)  # 직렬화 가능하도록 문자열 변환
 
-        # 특정 지역 메시지를 추가 (예시)
+        # 특정 지역 메시지를 추가
         district_message = f"{user_input.split()[0]} 지원정책입니다."
         
         return message, district_message
@@ -66,6 +66,9 @@ class Chat(Resource):
             # OpenAI API를 통해 응답 생성
             message, district_message = get_response(user_input)
 
+            # message, district_message 로직 추가해야함
+
+
             # 응답 반환
             return jsonify({
                 "message": message,
@@ -77,13 +80,11 @@ class Chat(Resource):
             return jsonify({"error": "응답을 생성하는 중 오류가 발생했습니다."}), 500
 
 
-
 # JSON 파일에서 지역 정보를 로드하는 함수
 def load_districts():
     try:
         with open('districts.json', 'r', encoding='utf-8') as f:
             data = json.load(f)
-            logger.info("districts.json 로드 성공")
             return data["districts"]
     except FileNotFoundError:
         logger.error("districts.json 파일을 찾을 수 없습니다.")
@@ -92,43 +93,52 @@ def load_districts():
 # 정책 정보를 생성하는 함수
 def generate_policy_info(district_name):
     try:
-        # OpenAI API를 사용하여 메시지 생성 (sia 모델로 갈아끼워야함)
-        response = openai.Completion.create(
-            engine="text-davinci-003",
-            prompt=f"{district_name} 정책에 대해 알려줘",
-            max_tokens=150,
-            temperature=0.5,
-        )
-
-        # 응답 메시지 추출
-        message = response.choices[0].text.strip()
+        # 입력된 지역명을 그대로 사용하여 비교
+        district_name_normalized = district_name.strip()
 
         # JSON 파일에서 지역 정보를 로드
         districts = load_districts()
 
-        # 로드된 JSON 데이터 로그 출력 (디버깅 용도)
-        logger.info(f"로드된 지역 데이터: {districts}")
-
         # 지역에 맞는 URL 찾기
         district_url = None
         for district in districts:
-            # 비교 시 대소문자 무시하고 공백 제거
-            if district["title"].strip().lower() == district_name.strip().lower():
+            logger.info(f"Checking district: {district['title']}")
+            if district["title"].strip() == district_name_normalized:
                 district_url = district["district_url"]
+                logger.info(f"Found URL for {district_name_normalized}: {district_url}")
                 break
 
-        # URL을 찾지 못한 경우 기본 URL 설정
+        # 지역 URL을 찾지 못하면 오류 메시지 반환
         if not district_url:
-            return district_name, "정책 정보를 불러오는 중 해당 지역의 정보를 찾지 못했습니다.", ""
+            return district_name_normalized, "URL 연결오류", ""
 
-        return district_name, message, district_url
+        # OpenAI API 호출을 주석 처리하고 URL만 반환
+        # OpenAI API를 사용하여 메시지 생성
+        # response = openai.ChatCompletion.create(
+        #     model="gpt-3.5-turbo", 
+        #     messages=[
+        #         {"role": "system", "content": "You are a helpful assistant providing policy information."},
+        #         {"role": "user", "content": f"{district_name_normalized} 정책에 대해 알려줘"}
+        #     ],
+        #     max_tokens=150,
+        #     temperature=0.5,
+        # )
+
+        # 응답 메시지 추출
+        # message = response['choices'][0]['message']['content'].strip()
+
+        # 디버깅을 위해 임시 메시지 반환
+        message = f"{district_name_normalized} 정책에 대한 임시 메시지."
+
+        return district_name_normalized, message, district_url
 
     except Exception as e:
         logger.error(f"Error fetching response from OpenAI: {e}")
-        return district_name, "정책 정보를 불러오는 중 오류가 발생했습니다.", ""
-    
+        return district_name, "정책 정보를 불러오는 중 오류가 발생했습니다.", district_url
 
-# 정책 엔드포인트 정의
+
+
+# 정책 엔드포인트
 @Chatbot.route('/policy', methods=['POST'])
 class Policy(Resource):
     def post(self):

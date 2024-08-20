@@ -2,7 +2,7 @@ from flask import Flask, send_from_directory
 from flask_restx import Api
 from flask_swagger_ui import get_swaggerui_blueprint
 from config import configure_swagger
-from chatbot import Chatbot
+from chatbot_service import chatbot_ns
 
 def create_app():
     # Flask 앱 생성
@@ -35,6 +35,6 @@ def create_app():
     # swagger.json 파일 제공 엔드포인트
     @app.route('/swagger.json')
     def swagger_json():
-        return send_from_directory('.', 'swagger.json')
+        return send_from_directory('/swagger.json', 'swagger.json')
 
     return app, api

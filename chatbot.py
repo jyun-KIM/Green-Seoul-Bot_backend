@@ -67,7 +67,7 @@ class Chat(Resource):
             message, district_message = get_response(user_input)
 
             # message, district_message 로직 추가해야함
-
+            
 
             # 응답 반환
             return jsonify({
@@ -181,13 +181,13 @@ def allowed_file(filename):
 def get_district_url(district_name):
     """district_name에 맞는 district_url을 반환"""
     try:
-        with open('district_websites.json', 'r', encoding='utf-8') as f:
+        with open('districts.json', 'r', encoding='utf-8') as f:
             district_data = json.load(f)
-        for district in district_data:
-            if district['district_name'] == district_name:
+        for district in district_data['districts']:
+            if district['title'] == district_name:
                 return district['district_url']
     except FileNotFoundError:
-        logger.error("District websites JSON file not found.")
+        logger.error("District JSON file not found.")
     return None
 
 # 사진 업로드 처리

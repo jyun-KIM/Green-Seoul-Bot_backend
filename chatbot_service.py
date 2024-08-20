@@ -16,22 +16,24 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 
 # 네임스페이스 정의
 chatbot_ns = Namespace('chatbot', description='Chatbot operations')
-policy_ns = Namespace('policy', description='Policy related operations')
-upload_ns = Namespace('upload', description='Image upload operations')
 
-# API 문서에서 사용할 모델 정의 (Swagger에서 보여줌)
+# Swagger API 문서에서 사용할 모델 정의
 chat_model = chatbot_ns.model('Chat', {
-    'user_input': fields.String(required=True, description='사용자의 입력값')
+    'user_input': fields.String(required=True, description='사용자 인풋')
 })
 
-policy_model = policy_ns.model('Policy', {
-    'district_name': fields.String(required=True, description='지역 이름')
+policy_model = chatbot_ns.model('Policy', {
+    'district_name': fields.String(required=True, description='지역구')
 })
 
-upload_model = upload_ns.model('Upload', {
-    'district_name': fields.String(required=True, description='지역 이름'),
-    'image_file': fields.String(description='업로드할 이미지 파일')
+upload_model = chatbot_ns.model('Upload', {
+    'district_name': fields.String(required=True, description='지역구'),
+    'image_file': fields.String(description='대형 폐기물 사진')
 })
+
+# 네임스페이스 등록
+api.add_namespace(chatbot_ns, path='/chat')
+
 
 # 로그 시작
 logger.info("로그 시작")
@@ -140,10 +142,10 @@ def generate_policy_info(district_name):
 
 
 # 재활용 지원 정책 정보 조회
-@policy_ns.route('/info')
+@chatbot_ns.route('/policy')
 class Policy(Resource):
-    @policy_ns.expect(policy_model)
-    @policy_ns.response(200, 'Success')
+    @chatbot_ns.expect(policy_model)
+    @chatbot_ns.response(200, 'Success')
     def post(self):
         """정책 정보 조회"""
         try:
@@ -180,10 +182,10 @@ def get_district_url(district_name):
 
 
 # 사진 업로드 처리
-@upload_ns.route('/photo')
+@chatbot_ns.route('/upload')
 class UploadPhoto(Resource):
-    @upload_ns.expect(upload_model)
-    @upload_ns.response(200, 'Success')
+    @chatbot_ns.expect(upload_model)
+    @chatbot_ns.response(200, 'Success')
     def post(self):
         """사진 업로드 처리"""
         try:
@@ -225,11 +227,6 @@ class UploadPhoto(Resource):
             logger.error(f"Error processing image upload: {e}", exc_info=True)
             return {"error": "이미지 처리 중 오류가 발생했습니다."}, 500
 
-
-# 네임스페이스 등록
-api.add_namespace(chatbot_ns, path='/chatbot')
-api.add_namespace(policy_ns, path='/policy')
-api.add_namespace(upload_ns, path='/upload')
 
 if __name__ == '__main__':
     app.run(debug=True)

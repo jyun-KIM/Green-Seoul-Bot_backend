@@ -20,7 +20,6 @@ Chatbot = Namespace('Chatbot')
 # 로그 시작
 logger.info("로그 시작")
 
-
 # OpenAI GPT-4 응답 생성 함수
 def get_response(user_input):
     try:

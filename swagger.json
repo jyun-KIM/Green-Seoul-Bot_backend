@@ -1,189 +1,190 @@
 {
-  "swagger": "2.0",
-  "info": {
-    "version": "1.0.0",
-    "title": "SeoulRechat API",
-    "description": "
-    OpenAI API를 사용한 AI 챗봇입니다. 사용자가 재활용 지원 정책 정보를 조회하고, 대형 폐기물을 분리수거 할 수 있습니다."
-  },
-  "basePath": "/",
-  "schemes": [
-    "http"
-  ],
-  "paths": {
-    "/chat": {
-      "post": {
-        "summary": "사용자 입력 처리",
-        "description": "사용자의 입력을 처리하여 랭체인으로 학습된 OpenAI API를 통해 응답을 생성합니다.",
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "in": "body",
-            "name": "body",
-            "description": "사용자 입력",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "user_input": {
-                  "type": "string",
-                  "example": "강남구 지원정책에 대해 알려줘"
+    "swagger": "2.0",
+    "info": {
+      "version": "1.0.0",
+      "title": "SeoulRechat API",
+      "description": "
+      OpenAI API를 사용한 AI 챗봇입니다. 사용자가 재활용 지원 정책 정보를 조회하고, 대형 폐기물을 분리수거 할 수 있습니다."
+    },
+    "basePath": "/",
+    "schemes": [
+      "http"
+    ],
+    "paths": {
+      "/chat": {
+        "post": {
+          "summary": "사용자 입력 처리",
+          "description": "사용자의 입력을 처리하여 랭체인으로 학습된 OpenAI API를 통해 응답을 생성합니다.",
+          "consumes": [
+            "application/json"
+          ],
+          "produces": [
+            "application/json"
+          ],
+          "parameters": [
+            {
+              "in": "body",
+              "name": "body",
+              "description": "사용자 입력",
+              "required": true,
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "user_input": {
+                    "type": "string",
+                    "example": "강남구 지원정책에 대해 알려줘"
+                  }
                 }
               }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "성공",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "string",
+                    "example": "대형 폐기물 분리수거 하는 방법."
+                  },
+                  "district_message": {
+                    "type": "string",
+                    "example": "지원정책."
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Bad Request"
+            },
+            "500": {
+              "description": "Internal Server Error"
             }
           }
-        ],
-        "responses": {
-          "200": {
-            "description": "성공",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "message": {
-                  "type": "string",
-                  "example": "대형 폐기물 분리수거 하는 방법."
-                },
-                "district_message": {
-                  "type": "string",
-                  "example": "지원정책."
+        }
+      },
+      "/policy": {
+        "post": {
+          "summary": "재활용 지원 정책 정보 조회",
+          "description": "해당 지역구의 정책 정보를 조회합니다.",
+          "consumes": [
+            "application/json"
+          ],
+          "produces": [
+            "application/json"
+          ],
+          "parameters": [
+            {
+              "in": "body",
+              "name": "body",
+              "description": "지역구",
+              "required": true,
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "district_name": {
+                    "type": "string",
+                    "example": "강남구"
+                  }
                 }
               }
             }
-          },
-          "400": {
-            "description": "Bad Request"
-          },
-          "500": {
-            "description": "Internal Server Error"
+          ],
+          "responses": {
+            "200": {
+              "description": "성공",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "district_name": {
+                    "type": "string",
+                    "example": "강남구"
+                  },
+                  "message": {
+                    "type": "string",
+                    "example": "정책에 대한 메시지."
+                  },
+                  "district_url": {
+                    "type": "string",
+                    "example": "https://www.gangnam.go.kr/main.do"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Bad Request"
+            },
+            "500": {
+              "description": "Internal Server Error"
+            }
+          }
+        }
+      },
+      "/upload": {
+        "post": {
+          "summary": "사진 업로드 처리",
+          "description": "대형 폐기물 사진을 업로드하고 해당하는 분리수거 정보를 반환합니다.",
+          "consumes": [
+            "multipart/form-data"
+          ],
+          "produces": [
+            "application/json"
+          ],
+          "parameters": [
+            {
+              "in": "formData",
+              "name": "district_name",
+              "description": "지역 이름",
+              "required": true,
+              "type": "string",
+              "example": "강남구"
+            },
+            {
+              "in": "formData",
+              "name": "image_file",
+              "description": "이미지 파일",
+              "required": true,
+              "type": "file"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "성공",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "district_name": {
+                    "type": "string",
+                    "example": "강남구"
+                  },
+                  "message": {
+                    "type": "string",
+                    "example": "이 대형 폐기물의 분리수거 방법은 이것 입니다."
+                  },
+                  "district_url": {
+                    "type": "string",
+                    "example": "https://www.gangnam.go.kr/main.do"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Bad Request"
+            },
+            "500": {
+              "description": "Internal Server Error"
+            }
           }
         }
       }
     },
-    "/policy": {
-      "post": {
-        "summary": "재활용 지원 정책 정보 조회",
-        "description": "해당 지역구의 정책 정보를 조회합니다.",
-        "consumes": [
-          "application/json"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "in": "body",
-            "name": "body",
-            "description": "지역구",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "district_name": {
-                  "type": "string",
-                  "example": "강남구"
-                }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "성공",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "district_name": {
-                  "type": "string",
-                  "example": "강남구"
-                },
-                "message": {
-                  "type": "string",
-                  "example": "정책에 대한 메시지."
-                },
-                "district_url": {
-                  "type": "string",
-                  "example": "https://www.gangnam.go.kr/main.do"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
+    "definitions": {},
+    "tags": [
+      {
+        "name": "OpenAI API",
+        "description": "OpenAI API를 사용한 Chatbot"
       }
-    },
-    "/upload": {
-      "post": {
-        "summary": "사진 업로드 처리",
-        "description": "대형 폐기물 사진을 업로드하고 해당하는 분리수거 정보를 반환합니다.",
-        "consumes": [
-          "multipart/form-data"
-        ],
-        "produces": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "in": "formData",
-            "name": "district_name",
-            "description": "지역 이름",
-            "required": true,
-            "type": "string",
-            "example": "강남구"
-          },
-          {
-            "in": "formData",
-            "name": "image_file",
-            "description": "이미지 파일",
-            "required": true,
-            "type": "file"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "성공",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "district_name": {
-                  "type": "string",
-                  "example": "강남구"
-                },
-                "message": {
-                  "type": "string",
-                  "example": "이 대형 폐기물의 분리수거 방법은 이것 입니다."
-                },
-                "district_url": {
-                  "type": "string",
-                  "example": "https://www.gangnam.go.kr/main.do"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad Request"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    }
-  },
-  "definitions": {},
-  "tags": [
-    {
-      "name": "OpenAI API",
-      "description": "OpenAI API를 사용한 Chatbot"
-    }
-  ]
-}
+    ]
+  }
+  

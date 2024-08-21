@@ -9,7 +9,7 @@ import json
 
 app = Flask(__name__)
 api = Api(app, version='1.0', title='Chatbot API',
-          description='A simple chatbot API with policy info and image upload.')
+        description='A simple chatbot API with policy info and image upload.')
 
 # OpenAI API 키 설정
 openai.api_key = os.getenv("OPENAI_API_KEY")
@@ -57,15 +57,12 @@ def get_response(user_input):
             message = answer['text']
         else:
             message = str(answer)
-
-        # 특정 지역 메시지를 추가
-        district_message = f"{user_input.split()[0]} 지원정책입니다."
         
-        return message, district_message
+        return message
     
     except Exception as e:
         logger.error(f"Error fetching response from OpenAI: {e}")
-        return "죄송합니다. 현재 서비스를 제공할 수 없습니다. 나중에 다시 시도해 주세요.", ""
+        return "죄송합니다. 현재 서비스를 제공할 수 없습니다. 나중에 다시 시도해 주세요."
 
 
 # 사용자 입력 처리
@@ -84,12 +81,11 @@ class Chat(Resource):
                 return {"error": "user_input이 필요합니다."}, 400
 
             # OpenAI API를 통해 응답 생성
-            message, district_message = get_response(user_input)
+            message = get_response(user_input)
 
             # 응답 반환
             return {
-                "message": message,
-                "district_message": district_message
+                "message": message
             }, 200
 
         except Exception as e:

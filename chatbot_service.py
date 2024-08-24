@@ -211,9 +211,10 @@ class UploadPhoto(Resource):
             
             print("file:", img)
             temp = model(img)
+            print(type(temp))
             print("temp:",temp)
-
-            recognized_result = "플라스틱 병"
+            df = temp.pandas().xyxy[0]
+            recognized_result = df.name[0]
             return {
                 "district_name": district_name,
                 "message": f"이 대형폐기물은 {recognized_result}입니다.",

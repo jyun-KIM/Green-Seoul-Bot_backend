@@ -6,6 +6,8 @@ from werkzeug.utils import secure_filename
 from config import logger
 from generate_chatbot import load_docs, create_vectorstore, create_rag_chain
 import json
+import torch
+#from torch import nn
 
 app = Flask(__name__)
 api = Api(app, version='1.0', title='Chatbot API',
@@ -176,6 +178,8 @@ def get_district_url(district_name):
         logger.error("District JSON file not found.")
     return None
 
+def save_image(file):
+    file.save('./temp/'+ file.filename)
 
 # 사진 업로드 처리
 @chatbot_ns.route('/upload')
@@ -199,18 +203,15 @@ class UploadPhoto(Resource):
             file = request.files['image_file']
             if file.filename == '':
                 return {"error": "파일 이름이 비어있습니다."}, 400
+            
+            save_image(file) # 들어오는 이미지 저장
+            img = './temp/' + file.filename
 
-            if not allowed_file(file.filename):
-                return {"error": "허용되지 않는 파일 형식입니다."}, 400
-
-            filename = secure_filename(file.filename)
-            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-
-            if not os.path.exists(app.config['UPLOAD_FOLDER']):
-                os.makedirs(app.config['UPLOAD_FOLDER'])
-
-            file.save(file_path)
-            logger.info(f"파일이 성공적으로 저장되었습니다: {file_path}")
+            model = torch.hub.load("./yolov5", 'custom', path='./best.pt', source='local')
+            
+            print("file:", img)
+            temp = model(img)
+            print("temp:",temp)
 
             recognized_result = "플라스틱 병"
             return {

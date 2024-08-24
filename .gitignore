@@ -5,3 +5,9 @@
 
 # 정책정보 파일
 text.txt
+
+#이미지 파일 저장
+/temp
+
+#yolo모델
+/yolov5

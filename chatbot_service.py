@@ -179,7 +179,7 @@ def get_district_url(district_name):
     return None
 
 def save_image(file):
-    file.save('./temp/'+ file.filename)
+    file.save('./uploads/'+ file.filename)
 
 # 사진 업로드 처리
 @chatbot_ns.route('/upload')
@@ -205,7 +205,7 @@ class UploadPhoto(Resource):
                 return {"error": "파일 이름이 비어있습니다."}, 400
             
             save_image(file) # 들어오는 이미지 저장
-            img = './upliads/' + file.filename
+            img = './uploads/' + file.filename
 
             model = torch.hub.load("./yolov5", 'custom', path='./best.pt', source='local')
             

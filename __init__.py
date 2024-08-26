@@ -17,7 +17,6 @@ def create_app():
 
     # Swagger 설정
     configure_swagger(api)
-
     # 네임스페이스 등록
     api.add_namespace(chatbot_ns, path='/chatbot')
     

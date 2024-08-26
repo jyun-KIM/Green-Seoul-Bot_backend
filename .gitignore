@@ -4,7 +4,8 @@
 /myenv
 
 # 정책정보 파일
-text.txt
+rewardPolicy.txt
+largewastePolicy.txt
 
 #대형 폐기물 파일
 largeWaste.txt

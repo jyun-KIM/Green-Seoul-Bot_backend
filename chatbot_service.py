@@ -205,7 +205,7 @@ class UploadPhoto(Resource):
                 return {"error": "파일 이름이 비어있습니다."}, 400
             
             save_image(file) # 들어오는 이미지 저장
-            img = './temp/' + file.filename
+            img = './upliads/' + file.filename
 
             model = torch.hub.load("./yolov5", 'custom', path='./best.pt', source='local')
             
@@ -215,6 +215,7 @@ class UploadPhoto(Resource):
             print("temp:",temp)
             df = temp.pandas().xyxy[0]
             recognized_result = df.name[0]
+
             return {
                 "district_name": district_name,
                 "message": f"이 대형폐기물은 {recognized_result}입니다.",

@@ -2,12 +2,12 @@ from flask import Flask, request, jsonify, make_response
 from flask_restx import Api, Namespace, Resource, fields
 import openai
 import os
-from werkzeug.utils import secure_filename
+#from werkzeug.utils import secure_filename
 from config import logger
-from generate_chatbot import load_rewardPolicy, create_vectorstore, create_rag_chain
+from generateMessage import load_rewardPolicy, create_vectorstore, create_rag_chain
 import json
 import torch
-#from torch import nn
+
 
 app = Flask(__name__)
 api = Api(app, version='1.0', title='Chatbot API',
@@ -130,6 +130,19 @@ class Policy(Resource):
 def save_image(file):
     file.save('./uploads/'+ file.filename)
 
+# 파일 경로에서 district 정보를 불러오는 함수
+def get_district_url(district_name):
+    try:
+        with open('districts.json', 'r', encoding='utf-8') as f:
+            district_data = json.load(f)
+        for district in district_data['districts']:
+            if district['title'] == district_name:
+                return district['district_url']
+    except FileNotFoundError:
+        logger.error("District JSON file not found.")
+    return None
+
+
 # 사진 업로드 처리
 @chatbot_ns.route('/upload')
 class UploadPhoto(Resource):
@@ -142,7 +155,7 @@ class UploadPhoto(Resource):
             if not district_name:
                 return {"error": "district_name이 제공되지 않았습니다."}, 400
 
-            district_url = load_district_websites()
+            district_url = get_district_url(district_name)
             if not district_url:
                 return {"error": f"'{district_name}'에 해당하는 구를 찾을 수 없습니다."}, 400
 

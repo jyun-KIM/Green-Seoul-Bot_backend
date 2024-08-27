@@ -2,19 +2,20 @@ import os
 from langchain_community.document_loaders import TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_openai import OpenAIEmbeddings
-#from langchain_community.vectorstores import Chroma
 from langchain_openai import ChatOpenAI
 from langchain.chains import create_retrieval_chain
 from dotenv import load_dotenv
 from langchain_community.vectorstores import FAISS
 from langchain_core.prompts import ChatPromptTemplate
 from langchain.chains.combine_documents import create_stuff_documents_chain
-from langchain_core.messages import HumanMessage, SystemMessage
-#from PIL import Image
+#from langchain_core.messages import HumanMessage, SystemMessage
 import io
 
+# OpenMP 라이브러리의 중복 초기화 허용
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
+
 load_dotenv()
+
 # OpenAI API 키 설정
 api_key = os.getenv("OPENAI_API_KEY")
 

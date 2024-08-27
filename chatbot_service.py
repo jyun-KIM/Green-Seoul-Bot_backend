@@ -128,7 +128,7 @@ class Policy(Resource):
 
 
 def save_image(file):
-    file.save('./temp/'+ file.filename)
+    file.save('./uploads/'+ file.filename)
 
 # 사진 업로드 처리
 @chatbot_ns.route('/upload')
@@ -142,7 +142,7 @@ class UploadPhoto(Resource):
             if not district_name:
                 return {"error": "district_name이 제공되지 않았습니다."}, 400
 
-            district_url = get_district_url(district_name)
+            district_url = load_district_websites()
             if not district_url:
                 return {"error": f"'{district_name}'에 해당하는 구를 찾을 수 없습니다."}, 400
 
@@ -154,7 +154,7 @@ class UploadPhoto(Resource):
                 return {"error": "파일 이름이 비어있습니다."}, 400
             
             save_image(file) # 들어오는 이미지 저장
-            img = './upliads/' + file.filename
+            img = './uploads/' + file.filename
 
             model = torch.hub.load("./yolov5", 'custom', path='./best.pt', source='local')
             

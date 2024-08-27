@@ -16,3 +16,5 @@ largeWaste.txt
 
 #yolo모델
 /yolov5
+
+*.pyc

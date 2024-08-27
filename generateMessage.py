@@ -34,7 +34,7 @@ def load_rewardPolicy():
     return splits
 
 
-# 문서 로드 함수
+# 정책정보 로드 함수
 def load_largewastePolicy():
     loader = TextLoader('largewastePolicy.txt')
     print(loader)
@@ -56,8 +56,8 @@ def create_vectorstore(splits):
     return vectorstore
 
 
-# RetrievalQA 체인 생성 함수
-def create_rag_chain(vectorstore):
+# 정책정보 체인 생성 함수
+def rewardChain(vectorstore):
     llm = ChatOpenAI(model_name="gpt-4o", temperature=1, openai_api_key=api_key)
 
     prompt = ChatPromptTemplate.from_template(
@@ -88,5 +88,30 @@ def create_rag_chain(vectorstore):
 
     return qa_chain
 
+# 대형폐기물 체인 생성 함수
+def largewastChain(vectorstore):
+    llm = ChatOpenAI(model_name="gpt-4o", temperature=1, openai_api_key=api_key)
+
+    prompt = ChatPromptTemplate.from_template(
+    """아래의 문맥을 사용하여 질문에 답하십시오.
+    
+    당신은 서울시 대형퍠기물 처리에 대한 정보를 제공하는 챗봇입니다. 
+    맨 앞에 인삿말을 넣지 마십시오.
+    친절하고 정중한 어조로 대답하세요. 한국어로 대답하세요. 당신의 이름은 'Green Seoul Bot' 입니다. 
+    해당 지역을 찾아 정보를 정확하게 읽어오십시오. 
+
+    인삿말을 빼고 시작하십시오.
 
 
+    Context: {context}
+    Question: {input}
+    Answer:""")
+
+    documents = load_largewastePolicy() 
+    embeddings = OpenAIEmbeddings()
+    vector = FAISS.from_documents(documents, embeddings)
+    retriever = vector.as_retriever()
+    document_chain = create_stuff_documents_chain(llm, prompt)
+    qa_chain = create_retrieval_chain(retriever, document_chain)
+
+    return qa_chain

@@ -4,7 +4,7 @@ import openai
 import os
 #from werkzeug.utils import secure_filename
 from config import logger
-from generateMessage import load_rewardPolicy, create_vectorstore, create_rag_chain
+from generateMessage import load_rewardPolicy, load_largewastePolicy, create_vectorstore, rewardChain, largewastChain
 import json
 import torch
 
@@ -49,11 +49,28 @@ def get_response(user_input):
         vectorstore = create_vectorstore(documents)
 
         # RetrievalQA 체인 생성
-        qa_chain = create_rag_chain(vectorstore)
+        qa_chain = rewardChain(vectorstore)
         answer = qa_chain.invoke({"input": user_input})
 
 
         return answer
+    
+    except Exception as e:
+        print(f"Error fetching response from OpenAI: {e}")
+        return "죄송합니다. 현재 서비스를 제공할 수 없습니다. 나중에 다시 시도해 주세요."
+    
+# OpenAI GPT-4 응답 생성 함수
+def largeWast_info(user_input):
+    try:
+        # 문서 로드 및 벡터 스토어 생성
+        documents = load_largewastePolicy() 
+        vectorstore = create_vectorstore(documents)
+
+        # RetrievalQA 체인 생성
+        qa_chain = largewastChain(vectorstore)
+        answer = qa_chain.invoke({"input": user_input})
+
+        return answer['answer']
     
     except Exception as e:
         print(f"Error fetching response from OpenAI: {e}")
@@ -170,17 +187,19 @@ class UploadPhoto(Resource):
             img = './uploads/' + file.filename
 
             model = torch.hub.load("./yolov5", 'custom', path='./best.pt', source='local')
-            
+
             print("file:", img)
             temp = model(img)
             print(type(temp))
             print("temp:",temp)
             df = temp.pandas().xyxy[0]
             recognized_result = df.name[0]
+            user_input = district_name + '의' + recognized_result + '폐기 방법'
+            answer = largeWast_info(user_input)
 
             return {
                 "district_name": district_name,
-                "message": f"이 대형폐기물은 {recognized_result}입니다.",
+                "message": answer,
                 "district_url": district_url
             }, 200
 

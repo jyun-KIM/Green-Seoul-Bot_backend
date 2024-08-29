@@ -8,8 +8,7 @@ from dotenv import load_dotenv
 from langchain_community.vectorstores import FAISS
 from langchain_core.prompts import ChatPromptTemplate
 from langchain.chains.combine_documents import create_stuff_documents_chain
-#from langchain_core.messages import HumanMessage, SystemMessage
-import io
+
 
 # OpenMP 라이브러리의 중복 초기화 허용
 os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
@@ -64,9 +63,9 @@ def rewardChain(vectorstore):
     """아래의 문맥을 사용하여 질문에 답하십시오.
     
     당신은 서울시의 재활용 지원 정책에 대한 정보를 제공하는 챗봇입니다. 
-    맨 앞에 인삿말을 넣지 마십시오.
     친절하고 정중한 어조로 대답하세요. 한국어로 대답하세요. 당신의 이름은 'Green Seoul Bot' 입니다. 
     '행정구역' 열에서 해당 지역을 찾아 맞는 정보만 정확하게 읽으세요. 
+    정보를 전달할 때는 인삿말을 넣지 마십시오.
 
     번호 단위로 줄바꿈을 하십시오.
     인삿말을 빼고 시작하십시오.

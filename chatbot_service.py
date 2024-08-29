@@ -2,11 +2,16 @@ from flask import Flask, request, jsonify, make_response
 from flask_restx import Api, Namespace, Resource, fields
 import openai
 import os
-#from werkzeug.utils import secure_filename
 from config import logger
 from generateMessage import load_rewardPolicy, load_largewastePolicy, create_vectorstore, rewardChain, largewastChain
 import json
 import torch
+import base64
+import io
+import cv2
+import numpy as np
+import matplotlib.pyplot as plt
+from PIL import Image
 
 
 app = Flask(__name__)
@@ -175,23 +180,28 @@ class UploadPhoto(Resource):
             district_url = get_district_url(district_name)
             if not district_url:
                 return {"error": f"'{district_name}'에 해당하는 구를 찾을 수 없습니다."}, 400
+            
+            '''
 
             if 'image_file' not in request.files:
                 return {"error": "파일이 없습니다."}, 400
-            
-            file = request.files['image_file']
-            if file.filename == '':
-                return {"error": "파일 이름이 비어있습니다."}, 400
-            
-            save_image(file) # 들어오는 이미지 저장
-            img = './uploads/' + file.filename
+            '''
+            image_data = request.form['image_file']
+
+            # 'data:image/jpeg;base64,' 부분 제거
+            base64_str = image_data.split(",")[1]
+    
+            # Base64 문자열을 바이트로 변환
+            byte_data = base64.b64decode(base64_str)
+
+            # 이미지로 변환 
+            img = Image.open(io.BytesIO(byte_data))
+            img = np.array(img)
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
             model = torch.hub.load("./yolov5", 'custom', path='./best.pt', source='local')
 
-            print("file:", img)
             temp = model(img)
-            print(type(temp))
-            print("temp:",temp)
             df = temp.pandas().xyxy[0]
             recognized_result = df.name[0]
             user_input = district_name + '의' + recognized_result + '폐기 방법'

@@ -190,6 +190,7 @@ class UploadPhoto(Resource):
 
             # 'data:image/jpeg;base64,' 부분 제거
             base64_str = image_data.split(",")[1]
+            base64_str = base64_str + '='*(4-len(base64_str)%4)
     
             # Base64 문자열을 바이트로 변환
             byte_data = base64.b64decode(base64_str)

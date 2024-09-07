@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify, make_response
+from flask_cors import CORS
 from flask_restx import Api, Namespace, Resource, fields
 import openai
 import os
@@ -15,8 +16,12 @@ from PIL import Image
 
 
 app = Flask(__name__)
+CORS(app)
+
 api = Api(app, version='1.0', title='Chatbot API',
         description='A simple chatbot API with policy info and image upload.')
+
+
 
 # OpenAI API 키 설정
 openai.api_key = os.getenv("OPENAI_API_KEY")

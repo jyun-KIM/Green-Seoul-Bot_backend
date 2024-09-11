@@ -5,7 +5,7 @@ from flask_cors import CORS
 
 
 app, api = create_app()
-CORS(app)  # 모든 도메인에서의 요청을 허용
+CORS(app, resources={r"/*": {"origins": "*"}})   # 모든 도메인에서의 요청을 허용
 
 api.add_namespace(chatbot_ns,'/chatbot')
 

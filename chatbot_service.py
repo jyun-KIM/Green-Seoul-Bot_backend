@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify, make_response
-from flask_cors import CORS
+#from flask_cors import CORS
 from flask_restx import Api, Namespace, Resource, fields
 import openai
 import os
@@ -13,14 +13,6 @@ import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image
-
-
-app = Flask(__name__)
-CORS(app)
-
-api = Api(app, version='1.0', title='Chatbot API',
-        description='A simple chatbot API with policy info and image upload.')
-
 
 
 # OpenAI API 키 설정
@@ -44,7 +36,7 @@ upload_model = chatbot_ns.model('Upload', {
 })
 
 # 네임스페이스 등록
-api.add_namespace(chatbot_ns, path='/chat')
+#api.add_namespace(chatbot_ns, path='/chat')
 
 
 # 로그 시작

@@ -1,132 +1,190 @@
 {
-  "openapi": "3.0.0",
-  "info": {
-    "title": "SeoulReChat API",
-    "description": "분리수거와 정책정보를 알려주는 AI챗봇 SeoulReChat API",
-    "version": "1.0.0"
-  },
-  "servers": [
-    {
-      "url": "http://localhost:5000"
-    }
-  ],
-  "paths": {
-    "/chatbot/": {
-      "post": {
-        "summary": "Chatbot endpoint for handling user input and payloads.",
-        "description": "Processes user input and payload to provide appropriate responses.",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
+    "swagger": "2.0",
+    "info": {
+      "version": "1.0.0",
+      "title": "SeoulRechat API",
+      "description": "
+      OpenAI API를 사용한 AI 챗봇입니다. 사용자가 재활용 지원 정책 정보를 조회하고, 대형 폐기물을 분리수거 할 수 있습니다."
+    },
+    "basePath": "/",
+    "schemes": [
+      "http"
+    ],
+    "paths": {
+      "/chat": {
+        "post": {
+          "summary": "사용자 입력 처리",
+          "description": "사용자의 입력을 처리하여 랭체인으로 학습된 OpenAI API를 통해 응답을 생성합니다.",
+          "consumes": [
+            "application/json"
+          ],
+          "produces": [
+            "application/json"
+          ],
+          "parameters": [
+            {
+              "in": "body",
+              "name": "body",
+              "description": "사용자 입력",
+              "required": true,
               "schema": {
-                "$ref": "#/components/schemas/Chat"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ChatResponse"
+                "type": "object",
+                "properties": {
+                  "user_input": {
+                    "type": "string",
+                    "example": "강남구 지원정책에 대해 알려줘"
+                  }
                 }
               }
             }
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "500": {
-            "description": "Server error"
-          }
-        }
-      }
-    }
-  },
-  "components": {
-    "schemas": {
-      "Chat": {
-        "type": "object",
-        "properties": {
-          "user_input": {
-            "type": "string",
-            "description": "User input to the chatbot"
-          },
-          "payload": {
-            "type": "string",
-            "description": "Payload indicating the type of request",
-            "enum": [
-              "usage",
-              "policy",
-              "select_district",
-              "input_district",
-              "how_to_dispose",
-              "upload_photo",
-              "upload_another"
-            ]
-          },
-          "photo": {
-            "type": "string",
-            "description": "Photo URL for the item to dispose"
-          }
-        },
-        "required": ["payload"]
-      },
-      "ChatResponse": {
-        "type": "object",
-        "properties": {
-          "message": {
-            "type": "string",
-            "description": "Response message from the chatbot"
-          },
-          "buttons": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "title": {
-                  "type": "string",
-                  "description": "Button title"
-                },
-                "payload": {
-                  "type": "string",
-                  "description": "Button payload"
-                },
-                "url": {
-                  "type": "string",
-                  "description": "Button URL (optional)"
+          ],
+          "responses": {
+            "200": {
+              "description": "성공",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "string",
+                    "example": "대형 폐기물 분리수거 하는 방법."
+                  },
+                  "district_message": {
+                    "type": "string",
+                    "example": "지원정책."
+                  }
                 }
-              },
-              "required": ["title"]
+              }
+            },
+            "400": {
+              "description": "Bad Request"
+            },
+            "500": {
+              "description": "Internal Server Error"
             }
           }
         }
       },
-      "DistrictForm": {
-        "type": "object",
-        "properties": {
-          "district_name": {
-            "type": "string",
-            "description": "Name of the district to retrieve information for",
-            "example": "강남구"
+      "/policy": {
+        "post": {
+          "summary": "재활용 지원 정책 정보 조회",
+          "description": "해당 지역구의 정책 정보를 조회합니다.",
+          "consumes": [
+            "application/json"
+          ],
+          "produces": [
+            "application/json"
+          ],
+          "parameters": [
+            {
+              "in": "body",
+              "name": "body",
+              "description": "지역구",
+              "required": true,
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "district_name": {
+                    "type": "string",
+                    "example": "강남구"
+                  }
+                }
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "성공",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "district_name": {
+                    "type": "string",
+                    "example": "강남구"
+                  },
+                  "message": {
+                    "type": "string",
+                    "example": "정책에 대한 메시지."
+                  },
+                  "district_url": {
+                    "type": "string",
+                    "example": "https://www.gangnam.go.kr/main.do"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Bad Request"
+            },
+            "500": {
+              "description": "Internal Server Error"
+            }
           }
-        },
-        "required": ["district_name"]
+        }
       },
-      "PhotoUploadForm": {
-        "type": "object",
-        "properties": {
-          "photo": {
-            "type": "string",
-            "description": "File path or URL for the uploaded photo",
-            "format": "binary"
+      "/upload": {
+        "post": {
+          "summary": "사진 업로드 처리",
+          "description": "대형 폐기물 사진을 업로드하고 해당하는 분리수거 정보를 반환합니다.",
+          "consumes": [
+            "multipart/form-data"
+          ],
+          "produces": [
+            "application/json"
+          ],
+          "parameters": [
+            {
+              "in": "formData",
+              "name": "district_name",
+              "description": "지역 이름",
+              "required": true,
+              "type": "string",
+              "example": "강남구"
+            },
+            {
+              "in": "formData",
+              "name": "image_file",
+              "description": "이미지 파일",
+              "required": true,
+              "type": "file"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "성공",
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "district_name": {
+                    "type": "string",
+                    "example": "강남구"
+                  },
+                  "message": {
+                    "type": "string",
+                    "example": "이 대형 폐기물의 분리수거 방법은 이것 입니다."
+                  },
+                  "district_url": {
+                    "type": "string",
+                    "example": "https://www.gangnam.go.kr/main.do"
+                  }
+                }
+              }
+            },
+            "400": {
+              "description": "Bad Request"
+            },
+            "500": {
+              "description": "Internal Server Error"
+            }
           }
-        },
-        "required": ["photo"]
+        }
       }
-    }
+    },
+    "definitions": {},
+    "tags": [
+      {
+        "name": "OpenAI API",
+        "description": "OpenAI API를 사용한 Chatbot"
+      }
+    ]
   }
-}
+  

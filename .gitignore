@@ -4,4 +4,15 @@
 /myenv
 
 # 정책정보 파일
-text.txt
+rewardPolicy.txt
+largewastePolicy.txt
+
+# 이미지 파일 저장
+/temp
+/uploads
+
+# yolo모델
+/yolov5
+
+# __pycache__ 제외
+*.pyc
